@@ -307,7 +307,7 @@ In addition to allowing customization of the 'amino acid' alphabet, we include f
 
 ## Contact
 
-Any issues or questions should be addressed to [us](sethna@princeton.edu).
+Any issues or questions should be addressed to [us](mailto:sethna@princeton.edu).
 
 ## License
 
