@@ -1,0 +1,9 @@
+include README.md
+include LICENSE
+include models/human_T_alpha/*
+include models/human_T_beta/*
+include models/mouse_T_beta/*
+include models/human_B_heavy/*
+include expanded_alphabet_files/example_expanded_amino_acid_alphabet.txt
+include results/
+include data/
