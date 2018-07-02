@@ -307,6 +307,8 @@ In addition to allowing customization of the 'amino acid' alphabet, we include f
 
 ## Contact
 
+Any issues or questions should be addressed to [us](sethna@princeton.edu).
+
 ## License
 
 Free use of OLGA is granted under the terms of the GNU General Public License version 3 (GPLv3).

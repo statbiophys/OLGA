@@ -9,3 +9,5 @@
 /*.egg
 
 .DS_Store
+
+.gitattributes
