@@ -1,7 +1,60 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
-"""
-Created on Mon Jun 25 13:04:44 2018
+"""Module for Monte Carlo generation of sequences from a V(D)J recomb model.
+
+    Copyright (C) 2018 Zachary Sethna
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+
+This module defines classes to randomly sample a V(D)J recomb model and 
+assemble CDR3 sequences defined by the sampled recombination events.
+
+
+
+The method gen_rnd_prod_CDR3 will generate the actual CDR3 sequences and 
+outputs both the nucleotide sequence and the amino acid sequence. It will also
+output the V and J gene/allele choices which can be discarded or stored as 
+the user desires. If a 'sequence read' (i.e. a sequence which mimics the
+primer positions from an actual sequencing experiment) is needed, the V and J
+identities can be used to determine what the sequence is outside of the CDR3
+region.
+
+Example
+-------
+>>> import olga.load_model as load_model
+>>> import olga.sequence_generation as seq_gen
+>>>
+>>> params_file_name = './models/human_T_beta/model_params.txt'
+>>> marginals_file_name = './models/human_T_beta/model_marginals.txt'
+>>> V_anchor_pos_file ='./models/human_T_beta/V_gene_CDR3_anchors.csv'
+>>> J_anchor_pos_file = './models/human_T_beta/J_gene_CDR3_anchors.csv'
+>>>
+>>> genomic_data = load_model.GenomicDataVDJ()
+>>> genomic_data.load_igor_genomic_data(params_file_name, V_anchor_pos_file, J_anchor_pos_file)
+>>>
+>>> generative_model = load_model.GenerativeModelVDJ()
+>>> generative_model.load_and_process_igor_model(marginals_file_name)
+>>>
+>>> seq_gen_model = seq_gen.SequenceGenerationVDJ(generative_model, genomic_data)
+>>>
+>>> seq_gen_model.gen_rnd_prod_CDR3()
+('TGTGCCAGCAGTGAAAAAAGGCAATGGGAAAGCGGGGAGCTGTTTTTT', 'CASSEKRQWESGELFF', 27, 8)
+>>> seq_gen_model.gen_rnd_prod_CDR3()
+('TGTGCCAGCAGTTTAGTGGGAAGGGCGGGGCCCTATGGCTACACCTTC', 'CASSLVGRAGPYGYTF', 14, 1)
+>>> seq_gen_model.gen_rnd_prod_CDR3()
+('TGTGCCAGCTGGACAGGGGGCAACTACGAGCAGTACTTC', 'CASWTGGNYEQYF', 55, 13)
 
 @author: zacharysethna
 """
