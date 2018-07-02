@@ -96,7 +96,7 @@ Did it work? If not, check these issues:
     3. python run_pgen.py data/example_seqs.tsv results/example_pgens.tsv --humanTCRB
 
 ### Specifying a default V(D)J model (or a custom model folder)
-All of the executables will require specifying a V(D)J generative model and genomic data. NAME ships with 4 default models that can be indicated by flags, or a custom model folder can be indicated.
+All of the executables will require specifying a V(D)J generative model and genomic data. OLGA ships with 4 default models that can be indicated by flags, or a custom model folder can be indicated.
 
 | Options                                        | Description                                      |
 |------------------------------------------------|--------------------------------------------------|
@@ -215,7 +215,7 @@ $ ./generate_synthetic_sequences.py data/example_seqs.tsv --humanTCRB -n 1e4
 
 ```
 
-## Using the Pgen modules in a Python script
+## Using the OLGA modules in a Python script
 In order to incorporate the core algorithm into an analysis pipeline (or to write your own script wrappers) all that is needed is to import the modules and load up a generative model. Each module defines some classes that only a few methods get called on.
 
 As the generative model structure is different between VDJ recombination and VJ recombination the algorithms to compute Pgen for the two are different. For this reason, different objects are defined for VDJ recombination models and VJ recombination models, however the *methods* that get called are the same.
@@ -236,7 +236,7 @@ There is a fair amount of parameter processing that must go on to call these met
 
 Instantiating GenerativeModelV(D)J and GenomicDataV(D)J leaves the attributes as dummies, and calling the methods load_and_process_igor_model and load_igor_genomic_data will load up IGoR files.
 
-If you are want to load models/data from other sources, you will need to write your own methods to set the attributes in GenerativeModelV(D)J and GenomicDataV(D)J. Please see the documentation of load_model.py for more details.
+If you want to load models/data from other sources, you will need to write your own methods to set the attributes in GenerativeModelV(D)J and GenomicDataV(D)J. Please see the documentation of load_model.py for more details.
 
 Here is an example of loading the default human TCRB model to compute some sequence Pgens and to generate some random CDR3 sequences:
 
@@ -305,7 +305,8 @@ etc, where symbolA and symbolB are single characters and aren't one of the prote
 
 In addition to allowing customization of the 'amino acid' alphabet, we include functions that can parse regular expressions with a limited vocabulary. In particular only [] and {} are supported (the symbol for a Kleene star, \*, is reserved for stop codons). The sequences corresponding to the regular expression can then be enumerated and their Pgens summed. Note, this can be slow as Pgen must be computed for each of the enumerated sequences independently. If a particular combination of amino acids is being used in a [] frequently consider defining a symbol for that combination and adding it to the alphabet. For example the regular expression 'CASS**[ACDEFGHIKLMNPQRSTVWY]**SARPEQFF' will list out 20 sequences, but its Pgen could be computed by considering the single CDR3 sequence 'CASS**X**SARPEQFF' Please see documentation in pgen.py for more info and examples.
 
-## Contributors
-
+## Contact
 
 ## License
+
+Free use of OLGA is granted under the terms of the GNU General Public License version 3 (GPLv3).
