@@ -8,4 +8,4 @@
 /*.egg-info
 /*.egg
 
-*.DS_Store
+.DS_Store
