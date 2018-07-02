@@ -21,13 +21,13 @@ OLGA is a python 2.7 software which only uses standard python libraries and requ
 The executable functions will assume a particular directory architecture. The minimal directory structure should be as follows:
 
 ```
-OLGA/
+olga/
 │   README.md
 │   run_pgen.py
 │   compute_single_sequence_pgen.py
 │   generate_synthetic_sequences.py    
 │
-└───OLGA/
+└───olga/
 │       generation_probability.py
 │       preprocess_generative_model_and_data.py
 │       load_model.py
@@ -241,9 +241,9 @@ If you are want to load models/data from other sources, you will need to write y
 Here is an example of loading the default human TCRB model to compute some sequence Pgens and to generate some random CDR3 sequences:
 
 ```
->>> import app.load_model as load_model
->>> import app.generation_probability as pgen
->>> import app.sequence_generation as seq_gen
+>>> import olga.load_model as load_model
+>>> import olga.generation_probability as pgen
+>>> import olga.sequence_generation as seq_gen
 >>>
 >>> #Define the files for loading in generative model/data
 ... params_file_name = './models/human_T_beta/model_params.txt'
@@ -251,8 +251,8 @@ Here is an example of loading the default human TCRB model to compute some seque
 >>> V_anchor_pos_file ='./models/human_T_beta/V_gene_CDR3_anchors.csv'
 >>> J_anchor_pos_file = './models/human_T_beta/J_gene_CDR3_anchors.csv'
 >>>
-... #Load data
->>> genomic_data = load_model.GenomicDataVDJ()
+>>> #Load data
+... genomic_data = load_model.GenomicDataVDJ()
 >>> genomic_data.load_igor_genomic_data(params_file_name, V_anchor_pos_file, J_anchor_pos_file)
 >>> #Load model
 ... generative_model = load_model.GenerativeModelVDJ()
