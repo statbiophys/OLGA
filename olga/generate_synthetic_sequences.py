@@ -1,6 +1,6 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
-"""Command line executable function to generate sequences.
+"""Command line script to generate sequences.
 
     Copyright (C) 2018 Zachary Sethna
 
@@ -62,10 +62,11 @@ model_marginals.txt (IGoR inference marginal file)
 V_gene_CDR3_anchors.csv (V residue anchor and functionality file)
 J_gene_CDR3_anchors.csv (J residue anchor and functionality file)
 -------------------------------------------------------------------------------
-Example call
+Example call (example calls are formatted as executed functions instead of the
+console script entry point. The arguments are identical in either case.)
 
 #Generate 1,000 seqs from the human TCRB default model, delimiter is tab
-./generate_synthetic_sequences.py data/example_seqs.tsv --humanTCRB -n 1e3
+./generate_synthetic_sequences.py example_seqs.tsv --humanTCRB -n 1e3
 
 -------------------------------------------------------------------------------
 Options:
@@ -122,28 +123,28 @@ string is 'FW'.
 Example calls with options
 
 #Output a .csv file with delimiter = comma.
-./generate_synthetic_sequences.py data/example_seqs.csv --VDJ_model_folder models/human_T_beta/ -n 1e3
+./generate_synthetic_sequences.py example_seqs.csv --VDJ_model_folder models/human_T_beta/ -n 1e3
 
 #Output the amino acid CDR3 seqs and not the nucleotide sequences
-./generate_synthetic_sequences.py data/example_seqs.tsv --humanTCRB -n 1e3 --seq_type amino_acid
+./generate_synthetic_sequences.py example_seqs.tsv --humanTCRB -n 1e3 --seq_type amino_acid
 
 #Don't record the V and J genes/alleles used to generate the sequences
-./generate_synthetic_sequences.py data/example_seqs.tsv --humanTCRB -n 1e3 --record_genes_off
+./generate_synthetic_sequences.py example_seqs.tsv --humanTCRB -n 1e3 --record_genes_off
 
 #Observe the time updates --- default is 1e5:
-./generate_synthetic_sequences.py data/example_seqs.tsv --humanTCRB -n 1e3 --seqs_per_time_update 100
+./generate_synthetic_sequences.py example_seqs.tsv --humanTCRB -n 1e3 --seqs_per_time_update 100
 
 #Don't give time updates
-./generate_synthetic_sequences.py data/example_seqs.tsv --humanTCRB -n 1e3 --seqs_per_time_update 100 --time_updates_off
+./generate_synthetic_sequences.py example_seqs.tsv --humanTCRB -n 1e3 --seqs_per_time_update 100 --time_updates_off
 
 #Set the pseudo-random number generator seed to 100 -- should be repeatable.
-./generate_synthetic_sequences.py data/example_seqs.tsv --humanTCRB -n 1e3 --seed 100
+./generate_synthetic_sequences.py example_seqs.tsv --humanTCRB -n 1e3 --seed 100
 
 #Specify that the conserved J residue is an F
-./generate_synthetic_sequences.py data/example_seqs.tsv --humanTCRB -n 1e3 --conserved_J_residues 'F'
+./generate_synthetic_sequences.py example_seqs.tsv --humanTCRB -n 1e3 --conserved_J_residues 'F'
 
 #Change the delimiter of the output file to space ' '.
-./generate_synthetic_sequences.py data/example_seqs.tsv --humanTCRB -n 1e3 --delimiter space
+./generate_synthetic_sequences.py example_seqs.tsv --humanTCRB -n 1e3 --delimiter space
 
 @author: zacharysethna
 
@@ -162,7 +163,7 @@ from optparse import OptionParser
 import time
 import numpy as np
 
-def main(argv):
+def main():
     """ Generate sequences."""
 
     parser = OptionParser(conflict_handler="resolve")
@@ -186,17 +187,13 @@ def main(argv):
 
     (options, args) = parser.parse_args()
 
-    try:
-        main_folder = __file__.rsplit('/', 1)[-2]
-    except IndexError: #In current folder, called from within python.
-        main_folder = '.'
+    main_folder = os.path.dirname(__file__)
 
     default_models = {}
-
-    default_models['humanTCRA'] = [main_folder + '/models/human_T_alpha/',  'VJ']
-    default_models['humanTCRB'] = [main_folder + '/models/human_T_beta/', 'VDJ']
-    default_models['mouseTCRB'] = [main_folder + '/models/mouse_T_beta/', 'VDJ']
-    default_models['humanIGH'] = [main_folder + '/models/human_B_heavy/', 'VDJ']
+    default_models['humanTCRA'] = [os.path.join(main_folder, 'default_models', 'human_T_alpha'),  'VJ']
+    default_models['humanTCRB'] = [os.path.join(main_folder, 'default_models', 'human_T_beta'), 'VDJ']
+    default_models['mouseTCRB'] = [os.path.join(main_folder, 'default_models', 'mouse_T_beta'), 'VDJ']
+    default_models['humanIGH'] = [os.path.join(main_folder, 'default_models', 'human_B_heavy'), 'VDJ']
 
     num_models_specified = sum([1 for x in default_models.keys() + ['vj_model_folder', 'vdj_model_folder'] if getattr(options, x)])
 
@@ -207,10 +204,10 @@ def main(argv):
             recomb_type = default_models[d_model][1]
         except IndexError:
             if options.vdj_model_folder: #custom VDJ model specified
-                model_folder = options.vdj_model_folder.rstrip('/') + '/'
+                model_folder = options.vdj_model_folder
                 recomb_type = 'VDJ'
             elif options.vj_model_folder: #custom VJ model specified
-                model_folder = options.vj_model_folder.rstrip('/') + '/'
+                model_folder = options.vj_model_folder
                 recomb_type = 'VJ'
     elif num_models_specified == 0:
         print 'Need to indicate generative model.'
@@ -227,10 +224,10 @@ def main(argv):
         print 'Exiting...'
         return -1
 
-    params_file_name = model_folder + 'model_params.txt'
-    marginals_file_name = model_folder + 'model_marginals.txt'
-    V_anchor_pos_file = model_folder + 'V_gene_CDR3_anchors.csv'
-    J_anchor_pos_file = model_folder + 'J_gene_CDR3_anchors.csv'
+    params_file_name = os.path.join(model_folder,'model_params.txt')
+    marginals_file_name = os.path.join(model_folder,'model_marginals.txt')
+    V_anchor_pos_file = os.path.join(model_folder,'V_gene_CDR3_anchors.csv')
+    J_anchor_pos_file = os.path.join(model_folder,'J_gene_CDR3_anchors.csv')
 
     for x in [params_file_name, marginals_file_name, V_anchor_pos_file, J_anchor_pos_file]:
         if not os.path.isfile(x):
@@ -365,4 +362,4 @@ def main(argv):
     print 'Completed generated all %d sequences in %s'%(num_seqs_to_generate, c_time_str)
     outfile.close()
 
-if __name__ == '__main__': main(sys.argv)
+if __name__ == '__main__': main()

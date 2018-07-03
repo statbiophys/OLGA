@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 """
-Command line executable function for Pgen computation of a single sequence.
+Command line script for Pgen computation of a single sequence.
 
     Copyright (C) 2018 Zachary Sethna
 
@@ -21,8 +21,8 @@ Command line executable function for Pgen computation of a single sequence.
 
 DON'T USE THIS FUNCTION TO LOOP OVER A LOT OF SEQUENCES. This function loads
 up and processes a full model to compute Pgen of a single sequence, and thus
-pays a time cost. If many sequences need to be run it is better to use
-run_pgen.py or to write your own wrapper.
+pays a nontrivial overhead time cost. If many sequences need to be run it is
+better to use run_pgen.py or to write your own wrapper.
 
 The sequence which is read in must be TRIMMED TO ONLY THE CDR3 region as
 defined by the V and J anchor files (default is to INCLUDE the conserved
@@ -36,7 +36,6 @@ Required input:
 
 1) Sequence
 THIS IS ASSUMED TO BE THE FIRST ARGUMENT (see example calls)
-
 
 2) Generative model used to define the generation probability  of a sequence.
 Flags for default models:
@@ -65,7 +64,8 @@ model_marginals.txt (IGoR inference marginal file)
 V_gene_CDR3_anchors.csv (V residue anchor and functionality file)
 J_gene_CDR3_anchors.csv (J residue anchor and functionality file)
 -------------------------------------------------------------------------------
-Example call
+Example call (example calls are formatted as executed functions instead of the
+console script entry point. The arguments are identical in either case.)
 
 ```
 $ ./compute_single_sequence_pgen.py CARQGALYEQYF --humanTCRB
@@ -136,7 +136,7 @@ import olga.generation_probability as generation_probability
 from olga.utils import nt2aa
 from optparse import OptionParser
 
-def main(argv):
+def main():
     """Compute Pgen of a single sequence."""
 
 
@@ -172,17 +172,13 @@ def main(argv):
         print 'Exiting...'
         return -1
 
-    try:
-        main_folder = __file__.rsplit('/', 1)[-2]
-    except IndexError: #In current folder, called from within python.
-        main_folder = '.'
+    main_folder = os.path.dirname(__file__)
 
     default_models = {}
-
-    default_models['humanTCRA'] = [main_folder + '/models/human_T_alpha/',  'VJ']
-    default_models['humanTCRB'] = [main_folder + '/models/human_T_beta/', 'VDJ']
-    default_models['mouseTCRB'] = [main_folder + '/models/mouse_T_beta/', 'VDJ']
-    default_models['humanIGH'] = [main_folder + '/models/human_B_heavy/', 'VDJ']
+    default_models['humanTCRA'] = [os.path.join(main_folder, 'default_models', 'human_T_alpha'),  'VJ']
+    default_models['humanTCRB'] = [os.path.join(main_folder, 'default_models', 'human_T_beta'), 'VDJ']
+    default_models['mouseTCRB'] = [os.path.join(main_folder, 'default_models', 'mouse_T_beta'), 'VDJ']
+    default_models['humanIGH'] = [os.path.join(main_folder, 'default_models', 'human_B_heavy'), 'VDJ']
 
     num_models_specified = sum([1 for x in default_models.keys() + ['vj_model_folder', 'vdj_model_folder'] if getattr(options, x)])
 
@@ -193,10 +189,10 @@ def main(argv):
             recomb_type = default_models[d_model][1]
         except IndexError:
             if options.vdj_model_folder: #custom VDJ model specified
-                model_folder = options.vdj_model_folder.rstrip('/') + '/'
+                model_folder = options.vdj_model_folder
                 recomb_type = 'VDJ'
             elif options.vj_model_folder: #custom VJ model specified
-                model_folder = options.vj_model_folder.rstrip('/') + '/'
+                model_folder = options.vj_model_folder
                 recomb_type = 'VJ'
     elif num_models_specified == 0:
         print 'Need to indicate generative model.'
@@ -213,10 +209,10 @@ def main(argv):
         print 'Exiting...'
         return -1
 
-    params_file_name = model_folder + 'model_params.txt'
-    marginals_file_name = model_folder + 'model_marginals.txt'
-    V_anchor_pos_file = model_folder + 'V_gene_CDR3_anchors.csv'
-    J_anchor_pos_file = model_folder + 'J_gene_CDR3_anchors.csv'
+    params_file_name = os.path.join(model_folder,'model_params.txt')
+    marginals_file_name = os.path.join(model_folder,'model_marginals.txt')
+    V_anchor_pos_file = os.path.join(model_folder,'V_gene_CDR3_anchors.csv')
+    J_anchor_pos_file = os.path.join(model_folder,'J_gene_CDR3_anchors.csv')
 
     for x in [params_file_name, marginals_file_name, V_anchor_pos_file, J_anchor_pos_file]:
         if not os.path.isfile(x):
@@ -359,4 +355,4 @@ def main(argv):
 
     print ''
 
-if __name__ == '__main__': main(sys.argv)
+if __name__ == '__main__': main()

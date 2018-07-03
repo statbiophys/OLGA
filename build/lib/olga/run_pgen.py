@@ -18,23 +18,23 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 This program will compute  the generation probabilities (Pgens) of sequences
-read in from a file as defined by a specified generative model. 
-This program has only minimal parsing built in, so the file read in must be 
+read in from a file as defined by a specified generative model.
+This program has only minimal parsing built in, so the file read in must be
 structured with delimiter spaced values (i.e. the data is organized in columns
 separated by delimiter like a .tsv or .csv file). Read the Options on delimiter
 for more info.
 
-The default is to assume that the sequences to be read in are in the first 
+The default is to assume that the sequences to be read in are in the first
 column (index 0), meaning that a text file with only a sequence on each line
-will be read in okay by default. 
+will be read in okay by default.
 
 The sequences which are read in must be TRIMMED TO ONLY THE CDR3 region as
-defined by the V and J anchor files (default is to INCLUDE the conserved 
+defined by the V and J anchor files (default is to INCLUDE the conserved
 residues of the C in the V region and the F/W in the J region).
 
-It is also possible to condition the Pgen computation on V and J identity by 
+It is also possible to condition the Pgen computation on V and J identity by
 specifying what index column the V and J gene/allele information is stored.
-Look at the example files/calls to see some examples of this syntax.                                     
+Look at the example files/calls to see some examples of this syntax.
 
 The default is for the program to run in 'safe mode' where all of the sequences
 and V/J masks are loaded up and checked before running. This mode also has a
@@ -42,24 +42,24 @@ display (default on) that will show some number of lines of the outfile as a
 visual check that the program is running properly (it also includes time, speed
 and progress). These can be disabled.
 
-This program runs on only one type of sequence (either nucleotide or amino 
-acid), which will be inferred by default in safe mode. Regular expression 
-sequences are not accepted in this program as they can incur large time costs 
+This program runs on only one type of sequence (either nucleotide or amino
+acid), which will be inferred by default in safe mode. Regular expression
+sequences are not accepted in this program as they can incur large time costs
 (instead consider defining a custom 'amino acid' alphabet to define the symbols
-used in the regular expressions if possible, or use the single sequence 
-function). If nucleotide sequences are read in it is possible to specify if the 
-output should be the nucleotide sequence Pgen and/or the translated amino acid 
+used in the regular expressions if possible, or use the single sequence
+function). If nucleotide sequences are read in it is possible to specify if the
+output should be the nucleotide sequence Pgen and/or the translated amino acid
 sequence Pgen (the default is to compute and output both).
 
 If not running in safe mode, sequences will be read in one by one and Pgen
-computed/written to the outfile as they are read in (so only one sequence is 
-held in memory at a time). In this mode, it is required to specify whether the 
-sequences to be read in are nucleotide sequences or 'amino acid' sequences. 
+computed/written to the outfile as they are read in (so only one sequence is
+held in memory at a time). In this mode, it is required to specify whether the
+sequences to be read in are nucleotide sequences or 'amino acid' sequences.
 
 As it is rare for datasets to be >> 1e4, parallelization is not built in.
 However, there are options to skip N lines of the file and to load at most M
-sequences so, if wanted, one could build a parallelized wrapper around this 
-script (though it would be recommended to instead just import the modules and 
+sequences so, if wanted, one could build a parallelized wrapper around this
+script (though it would be recommended to instead just import the modules and
 build from there).
 
 Required inputs:
@@ -71,7 +71,7 @@ THIS IS ASSUMED TO BE THE FIRST ARGUMENT (see example calls)
 THIS IS ASSUMED TO BE THE SECOND ARGUMENT (see example calls)
 
 3) Generative model used to define the generation probability  of a sequence.
-Flags for default models: 
+Flags for default models:
 
 --humanTCRA or --human_T_alpha (default Human T cell alpha chain model)
 --humanTCRB or --human_T_beta (default Human T cell beta chain model)
@@ -182,7 +182,7 @@ Options:
   --comment_delimiter=COMMENT_DELIMITER
                         character or string to indicate comment or header
                         lines to skip.
--------------------------------------------------------------------------------    
+-------------------------------------------------------------------------------
 Example calls with options
 
 #Only run on the first 250 seqs (all the other examples will also be restricted to 250 seqs)
@@ -233,11 +233,11 @@ from optparse import OptionParser
 
 
 
-def main(argv):
+def main():
     """Compute Pgens from a file and output to another file."""
-    
+
     parser = OptionParser(conflict_handler="resolve")
-    
+
     parser.add_option('--humanTCRA', '--human_T_alpha', action='store_true', dest='humanTCRA', default=False, help='use default human TCRA model (T cell alpha chain)')
     parser.add_option('--humanTCRB', '--human_T_beta', action='store_true', dest='humanTCRB', default=False, help='use default human TCRB model (T cell beta chain)')
     parser.add_option('--mouseTCRB', '--mouse_T_beta', action='store_true', dest='mouseTCRB', default=False, help='use default mouse TCRB model (T cell beta chain)')
@@ -253,15 +253,15 @@ def main(argv):
     parser.add_option('--seq_type', type='choice', dest='seq_type',  choices=['ntseq', 'nucleotide', 'aaseq', 'amino_acid'], help="declare sequence type. Infers seq_type by default in safe_mode. Need to declare when safe_mode is off. Choices: 'ntseq', 'nucleotide', 'aaseq', 'amino_acid'")
     parser.add_option('--seq_type_out', type='choice',metavar='SEQ_TYPE', dest='seq_type_out',  choices=['all', 'ntseq', 'nucleotide', 'aaseq', 'amino_acid'], help="if read in sequences are ntseqs, declare what type of sequence to compute pgen for. Default is all. Choices: 'all', 'ntseq', 'nucleotide', 'aaseq', 'amino_acid'")
     parser.add_option('--skip_off','--skip_empty_sequences_off', action='store_true', dest = 'skip_empty_sequences', default=True, help='stop skipping empty or blank sequences/lines (if for example you want to keep line index fidelity between the infile and outfile).')
-    
-    parser.add_option('--safe_mode_off', action='store_false', dest='safe_mode', default=True, help='turn safe_mode off. Default is on.')    
-    parser.add_option('--display_seqs_off', action='store_false', dest='display_seqs', default=True, help='turn the sequence display off (only applies in safe mode). Default is on.')    
+
+    parser.add_option('--safe_mode_off', action='store_false', dest='safe_mode', default=True, help='turn safe_mode off. Default is on.')
+    parser.add_option('--display_seqs_off', action='store_false', dest='display_seqs', default=True, help='turn the sequence display off (only applies in safe mode). Default is on.')
     parser.add_option('--num_lines_for_display', type='int', metavar='N', default = 50, dest='num_lines_for_display', help='N lines of the output file are displayed when sequence display is on. Also used to determine the number of sequences to average over for speed and time estimates.')
-    parser.add_option('--time_updates_off', action='store_false', dest='time_updates', default=True, help='turn time updates off (only applies when sequence display is disabled).')    
-    parser.add_option('--seqs_per_time_update', type='float', metavar='N', default = 100, dest='seqs_per_time_update', help='specify the number of sequences between time updates. Default is 1e5.')    
+    parser.add_option('--time_updates_off', action='store_false', dest='time_updates', default=True, help='turn time updates off (only applies when sequence display is disabled).')
+    parser.add_option('--seqs_per_time_update', type='float', metavar='N', default = 100, dest='seqs_per_time_update', help='specify the number of sequences between time updates. Default is 1e5.')
     parser.add_option('--print_warnings_off', action='store_false', dest="print_warnings", default=True, help='turn Pgen print warnings off')
     parser.add_option('--overwrite_on', action='store_true', dest="overwrite", default=False, help='overwrites outfile without prompt when safe mode is turned off.')
-  
+
     parser.add_option('-d', '--delimiter', type='choice', dest='delimiter',  choices=['tab', 'space', ',', ';', ':'], help="declare infile delimiter. Default is tab for .tsv input files, comma for .csv files, and any whitespace for all others. Choices: 'tab', 'space', ',', ';', ':'")
     parser.add_option('--raw_delimiter', type='str', dest='delimiter', help="declare infile delimiter as a raw string.")
     parser.add_option('--delimiter_out', type='choice', dest='delimiter_out',  choices=['tab', 'space', ',', ';', ':'], help="declare outfile delimiter. Default is tab for .tsv output files, comma for .csv files, and the infile delimiter for all others. Choices: 'tab', 'space', ',', ';', ':'")
@@ -269,9 +269,9 @@ def main(argv):
     parser.add_option('--gene_mask_delimiter', type='choice', dest='gene_mask_delimiter',  choices=['tab', 'space', ',', ';', ':'], help="declare gene mask delimiter. Default comma unless infile delimiter is comma, then default is a semicolon. Choices: 'tab', 'space', ',', ';', ':'")
     parser.add_option('--raw_gene_mask_delimiter', type='str', dest='gene_mask_delimiter', help="declare delimiter of gene masks as a raw string.")
     parser.add_option('--comment_delimiter', type='str', dest='comment_delimiter', help="character or string to indicate comment or header lines to skip.")
-    
-    
-    (options, args) = parser.parse_args()  
+
+
+    (options, args) = parser.parse_args()
 
     #INFILE IS THE FIRST ARGUMENT
     try:
@@ -280,32 +280,27 @@ def main(argv):
         print 'Need to specify PATH/TO/INFILE as the first argument!'
         print 'Exiting...'
         return -1
-    
+
     if len(infile_name.strip()) == 0:
         print 'Need to specify PATH/TO/INFILE as the first argument!'
         print 'Exiting...'
         return -1
-    
+
     if not os.path.isfile(infile_name):
         print 'Cannot find file: ' + infile_name
         print 'Exiting...'
         return -1
-    
-    
-    try:
-        main_folder = __file__.rsplit('/', 1)[-2]
-    except IndexError: #In current folder, called from within python.
-        main_folder = '.'
-    
+
+    main_folder = os.path.dirname(__file__)
+
     default_models = {}
-    
-    default_models['humanTCRA'] = [main_folder + '/models/human_T_alpha/',  'VJ']
-    default_models['humanTCRB'] = [main_folder + '/models/human_T_beta/', 'VDJ']
-    default_models['mouseTCRB'] = [main_folder + '/models/mouse_T_beta/', 'VDJ']
-    default_models['humanIGH'] = [main_folder + '/models/human_B_heavy/', 'VDJ']
-    
+    default_models['humanTCRA'] = [os.path.join(main_folder, 'default_models', 'human_T_alpha'),  'VJ']
+    default_models['humanTCRB'] = [os.path.join(main_folder, 'default_models', 'human_T_beta'), 'VDJ']
+    default_models['mouseTCRB'] = [os.path.join(main_folder, 'default_models', 'mouse_T_beta'), 'VDJ']
+    default_models['humanIGH'] = [os.path.join(main_folder, 'default_models', 'human_B_heavy'), 'VDJ']
+
     num_models_specified = sum([1 for x in default_models.keys() + ['vj_model_folder', 'vdj_model_folder'] if getattr(options, x)])
-    
+
     if num_models_specified == 1: #exactly one model specified
         try:
             d_model = [x for x in default_models.keys() if getattr(options, x)][0]
@@ -313,10 +308,10 @@ def main(argv):
             recomb_type = default_models[d_model][1]
         except IndexError:
             if options.vdj_model_folder: #custom VDJ model specified
-                model_folder = options.vdj_model_folder.rstrip('/') + '/'
+                model_folder = options.vdj_model_folder
                 recomb_type = 'VDJ'
             elif options.vj_model_folder: #custom VJ model specified
-                model_folder = options.vj_model_folder.rstrip('/') + '/'
+                model_folder = options.vj_model_folder
                 recomb_type = 'VJ'
     elif num_models_specified == 0:
         print 'Need to indicate generative model.'
@@ -326,26 +321,26 @@ def main(argv):
         print 'Only specify one model'
         print 'Exiting...'
         return -1
-    
+
     #Check that all model and genomic files exist in the indicated model folder
     if not os.path.isdir(model_folder):
         print 'Check pathing... cannot find the model folder: ' + model_folder
         print 'Exiting...'
         return -1
-    
-    params_file_name = model_folder + 'model_params.txt'
-    marginals_file_name = model_folder + 'model_marginals.txt'
-    V_anchor_pos_file = model_folder + 'V_gene_CDR3_anchors.csv'
-    J_anchor_pos_file = model_folder + 'J_gene_CDR3_anchors.csv'
-    
+
+    params_file_name = os.path.join(model_folder,'model_params.txt')
+    marginals_file_name = os.path.join(model_folder,'model_marginals.txt')
+    V_anchor_pos_file = os.path.join(model_folder,'V_gene_CDR3_anchors.csv')
+    J_anchor_pos_file = os.path.join(model_folder,'J_gene_CDR3_anchors.csv')
+
     for x in [params_file_name, marginals_file_name, V_anchor_pos_file, J_anchor_pos_file]:
         if not os.path.isfile(x):
             print 'Cannot find: ' + x
             print 'Please check the files (and naming conventions) in the model folder ' + model_folder
             print 'Exiting...'
             return -1
-    
-    
+
+
     safe_mode = options.safe_mode
     overwrite = options.overwrite
     #OUTFILE IS THE SECOND ARGUMENT
@@ -355,12 +350,12 @@ def main(argv):
         print 'Need to specify PATH/TO/OUTFILE as the second argument!'
         print 'Exiting...'
         return -1
-    
+
     if len(outfile_name.strip()) == 0:
         print 'Need to specify PATH/TO/OUTFILE as the second argument!'
         print 'Exiting...'
         return -1
-    
+
     if os.path.isfile(outfile_name):
         if safe_mode:
             if not raw_input(outfile_name + ' already exists. Overwrite (y/n)? ').strip().lower() in ['y', 'yes']:
@@ -371,10 +366,10 @@ def main(argv):
                 print outfile_name + ' already exists! To overwrite use --overwrite_on'
                 print 'Exiting...'
                 return -1
-    
-    
-    
-    
+
+
+
+
     #Parse delimiter
     delimiter = options.delimiter
     if delimiter is None: #Default case
@@ -387,8 +382,8 @@ def main(argv):
             delimiter = {'tab': '\t', 'space': ' ', ',': ',', ';': ';', ':': ':'}[delimiter]
         except KeyError:
             pass #Other string passed as the delimiter.
-    
-    #Parse delimiter_out        
+
+    #Parse delimiter_out
     delimiter_out = options.delimiter_out
     if delimiter_out is None: #Default case
         if delimiter is None:
@@ -404,8 +399,8 @@ def main(argv):
             delimiter_out = {'tab': '\t', 'space': ' ', ',': ',', ';': ';', ':': ':'}[delimiter_out]
         except KeyError:
             pass #Other string passed as the delimiter.
-        
-    #Parse gene_delimiter        
+
+    #Parse gene_delimiter
     gene_mask_delimiter = options.gene_mask_delimiter
     if gene_mask_delimiter is None: #Default case
         gene_mask_delimiter = ','
@@ -416,8 +411,8 @@ def main(argv):
             gene_mask_delimiter = {'tab': '\t', 'space': ' ', ',': ',', ';': ';', ':': ':'}[gene_mask_delimiter]
         except KeyError:
             pass #Other string passed as the delimiter.
-    
-    
+
+
     #More options
     alphabet_filename = options.alphabet_filename #used if a custom alphabet is to be specified
     seq_type_in = options.seq_type
@@ -428,28 +423,28 @@ def main(argv):
     seq_type_out = options.seq_type_out #type of pgens to be computed. Can be ntseq, aaseq, or both
     seq_in_index = options.seq_in_index #where in the line the sequence is after line.split(delimiter)
     lines_to_skip = options.lines_to_skip #one method of skipping header
-    comment_delimiter = options.comment_delimiter #another method of skipping header   
+    comment_delimiter = options.comment_delimiter #another method of skipping header
     seqs_per_time_update = options.seqs_per_time_update
     max_number_of_seqs = options.max_number_of_seqs
     V_mask_index = options.V_mask_index #Default is not conditioning on V identity
     J_mask_index = options.J_mask_index #Default is not conditioning on J identity
     skip_empty_sequences = options.skip_empty_sequences
-    
-    
+
+
     #Set seq_types
     if seq_type_in is not None:
         seq_type_in = {'ntseq': 'ntseq', 'nucleotide': 'ntseq', 'aaseq': 'aaseq', 'amino_acid': 'aaseq'}[seq_type_in]
     if seq_type_out is not None:
         seq_type_out = {'all': None, 'ntseq': 'ntseq', 'nucleotide': 'ntseq', 'aaseq': 'aaseq', 'amino_acid': 'aaseq'}[seq_type_out]
 
-    
+
     if seq_type_in == 'aaseq' and seq_type_out == 'ntseq':
         print "Can't compute nucleotide Pgen from an amino acid sequence (seq_type_in = aaseq, seq_type_out = ntseq)"
         print 'Exiting...'
         return -1
 
 
-    #Load up model based on recomb_type           
+    #Load up model based on recomb_type
     #VDJ recomb case --- used for TCRB and IGH
     if recomb_type == 'VDJ':
         genomic_data = load_model.GenomicDataVDJ()
@@ -457,7 +452,7 @@ def main(argv):
         generative_model = load_model.GenerativeModelVDJ()
         generative_model.load_and_process_igor_model(marginals_file_name)
         pgen_model = generation_probability.GenerationProbabilityVDJ(generative_model, genomic_data, alphabet_filename)
-    #VJ recomb case --- used for TCRA and light chain    
+    #VJ recomb case --- used for TCRA and light chain
     elif recomb_type == 'VJ':
         genomic_data = load_model.GenomicDataVJ()
         genomic_data.load_igor_genomic_data(params_file_name, V_anchor_pos_file, J_anchor_pos_file)
@@ -470,21 +465,21 @@ def main(argv):
         seqs = []
         V_usage_masks = []
         J_usage_masks = []
-        
+
         infile = open(infile_name, 'r')
-        
+
         for i, line in enumerate(infile):
             if comment_delimiter is not None: #Default case -- no comments/header delimiter
                 if line.startswith(comment_delimiter): #allow comments
                     continue
             if i < lines_to_skip:
                 continue
-            
+
             if delimiter is None: #Default delimiter is just any whitespace
                 split_line = line.split()
             else:
                 split_line = line.split(delimiter)
-            
+
             #Find seq
             try:
                 seq = split_line[seq_in_index].strip()
@@ -499,7 +494,7 @@ def main(argv):
                         print 'Unrecognized symbols: ' + ', '.join([x for x in seq if not x in pgen_model.codons_dict.keys()])
                         print 'Exiting...'
                         infile.close()
-                        return -1        
+                        return -1
                 elif seq_type_in == 'ntseq':
                     #check that seq is only composed of nucleotides
                     if all([x in 'ACGTacgt' for x in seq]):
@@ -517,7 +512,7 @@ def main(argv):
                         return -1
                 else: #Will infer seq_type_in and vet sequences later
                     seqs.append(seq)
-                    
+
             except IndexError: #no index match for seq
                 if skip_empty_sequences:
                     if len(line.strip()) == 0:
@@ -526,7 +521,7 @@ def main(argv):
                 print 'Exiting...'
                 infile.close()
                 return -1
-            
+
             #Find and format V_usage_mask
             if V_mask_index is None:
                 V_usage_masks.append(None) #default mask
@@ -541,13 +536,13 @@ def main(argv):
                         print 'Unrecognized V gene/allele names: ' + ', '.join([v for v in V_usage_mask if not v in pgen_model.V_mask_mapping.keys()])
                         print 'Exiting...'
                         infile.close()
-                        return -1 
+                        return -1
                 except IndexError: #no index match for V_mask_index
                     print 'V_mask_index is out of range'
                     print 'Exiting...'
                     infile.close()
                     return -1
-                
+
             #Find and format J_usage_mask
             if J_mask_index is None:
                 J_usage_masks.append(None) #default mask
@@ -562,19 +557,19 @@ def main(argv):
                         print 'Unrecognized J gene/allele names: ' + ', '.join([j for j in J_usage_mask if not j in pgen_model.J_mask_mapping.keys()])
                         print 'Exiting...'
                         infile.close()
-                        return -1 
+                        return -1
                 except IndexError: #no index match for J_mask_index
                     print 'J_mask_index is out of range'
                     print 'Exiting...'
                     infile.close()
                     return -1
-                
+
             if max_number_of_seqs is not None:
                 if len(seqs) >= max_number_of_seqs:
                     break
-        
+
         infile.close()
-        
+
         if seq_type_in == 'aaseq': #Check if the 'aaseqs' read in are actually 'ntseqs'
             all_symbols_nts = True
             for seq in seqs:
@@ -587,7 +582,7 @@ def main(argv):
                     seq_type_in = 'ntseq'
                 else:
                     print 'Okay... you are the boss... chances are all the Pgens will be 0.'
-                    
+
         elif seq_type_in is None: #no specified seq_type_in --- infer if possible
             ntseq_poss = True
             aaseq_poss = True
@@ -603,7 +598,7 @@ def main(argv):
                     ntseq_poss = False
                     aaseq_poss = False
                     break
-            
+
             if ntseq_poss: #If nucleotide sequence is possible set seq_type_in to nucleotide
                 seq_type_in = 'ntseq'
             elif aaseq_poss:
@@ -620,12 +615,12 @@ def main(argv):
                 print 'Sequence ' + seq + " is unrecognized as either an 'amino acid' sequence or a nucleotide sequence."
                 print 'Exiting...'
                 return -1
-            
+
             if seq_type_in == 'aaseq' and seq_type_out == 'ntseq':
                 print "Can't compute nucleotide Pgen from an amino acid sequence (seq_type_in = aaseq, seq_type_out = ntseq)"
                 print 'Exiting...'
                 return -1
-        
+
         print 'Successfully read in and formatted ' + str(len(seqs)) + ' sequences and any V or J usages.'
         if display_seqs:
             print_warnings = False #Can't print warnings with display on
@@ -640,11 +635,11 @@ def main(argv):
             time.sleep(0.4)
         else:
             print 'Continuing to Pgen computation.'
-        
+
         if display_seqs:
             lines_for_display = []
             times_for_speed_calc = [time.time()]
-        
+
         outfile = open(outfile_name, 'w')
         start_time = time.time()
         for i, seq in enumerate(seqs):
@@ -656,10 +651,10 @@ def main(argv):
                 ntseq = seq
                 if len(ntseq) % 3 == 0: #inframe sequence
                     aaseq = nt2aa(ntseq)
-                    
+
                     #Compute Pgen and print out based on recomb_type and seq_type_out
                     if seq_type_out is None:
-                        c_pgen_line = ntseq + delimiter_out + str(pgen_model.compute_nt_CDR3_pgen(ntseq, V_usage_masks[i], J_usage_masks[i], print_warnings)) + delimiter_out + aaseq + delimiter_out +  str(pgen_model.compute_aa_CDR3_pgen(aaseq, V_usage_masks[i], J_usage_masks[i], print_warnings))    
+                        c_pgen_line = ntseq + delimiter_out + str(pgen_model.compute_nt_CDR3_pgen(ntseq, V_usage_masks[i], J_usage_masks[i], print_warnings)) + delimiter_out + aaseq + delimiter_out +  str(pgen_model.compute_aa_CDR3_pgen(aaseq, V_usage_masks[i], J_usage_masks[i], print_warnings))
                     elif seq_type_out == 'ntseq':
                         c_pgen_line = ntseq + delimiter_out + str(pgen_model.compute_nt_CDR3_pgen(ntseq, V_usage_masks[i], J_usage_masks[i], print_warnings))
                     elif seq_type_out == 'aaseq':
@@ -672,23 +667,23 @@ def main(argv):
                         c_pgen_line = ntseq + delimiter_out + '0'
                     elif seq_type_out == 'aaseq':
                         c_pgen_line = 'out_of_frame' + delimiter_out + '0'
-                    
+
                 outfile.write(c_pgen_line + '\n')
-            
+
             #Print time update
             if display_seqs:
                 cc_time = time.time()
                 c_time = cc_time - start_time
                 times_for_speed_calc = [cc_time] + times_for_speed_calc[:num_lines_for_display]
                 c_avg_speed = (len(times_for_speed_calc)-1)/float(times_for_speed_calc[0] - times_for_speed_calc[-1])
-                
+
                 #eta = ((len(seqs) - (i+1))/float(i+1))*c_time
-                
+
                 eta = (len(seqs) - (i+1))/c_avg_speed
-                
+
                 lines_for_display = [c_pgen_line] + lines_for_display[:num_lines_for_display]
-                
-                
+
+
                 c_time_str = '%s hours, %s minutes, and %s seconds.'%(repr(int(c_time)/3600).rjust(3), repr((int(c_time)/60)%60).rjust(2), repr(int(c_time)%60).rjust(2))
                 eta_str = '%s hours, %s minutes, and %s seconds.'%(repr(int(eta)/3600).rjust(3), repr((int(eta)/60)%60).rjust(2), repr(int(eta)%60).rjust(2))
                 time_str = 'Time to compute Pgen on %s seqs: %s \nEst. time for remaining %s seqs: %s'%(repr(i+1).rjust(9), c_time_str, repr(len(seqs) - (i + 1)).rjust(9), eta_str)
@@ -699,46 +694,46 @@ def main(argv):
                 c_time = time.time() - start_time
                 eta = ((len(seqs) - (i+1))/float(i+1))*c_time
                 if c_time > 86400: #more than a day
-                    c_time_str = '%d days, %d hours, %d minutes, and %.2f seconds.'%(int(c_time)/86400, (int(c_time)/3600)%24, (int(c_time)/60)%60, c_time%60) 
+                    c_time_str = '%d days, %d hours, %d minutes, and %.2f seconds.'%(int(c_time)/86400, (int(c_time)/3600)%24, (int(c_time)/60)%60, c_time%60)
                 elif c_time > 3600: #more than an hr
-                    c_time_str = '%d hours, %d minutes, and %.2f seconds.'%((int(c_time)/3600)%24, (int(c_time)/60)%60, c_time%60) 
+                    c_time_str = '%d hours, %d minutes, and %.2f seconds.'%((int(c_time)/3600)%24, (int(c_time)/60)%60, c_time%60)
                 elif c_time > 60: #more than a min
                     c_time_str = '%d minutes and %.2f seconds.'%((int(c_time)/60)%60, c_time%60)
                 else:
                     c_time_str = '%.2f seconds.'%(c_time)
-                
+
                 if eta > 86400: #more than a day
-                    eta_str = '%d days, %d hours, %d minutes, and %.2f seconds.'%(int(eta)/86400, (int(eta)/3600)%24, (int(eta)/60)%60, eta%60) 
+                    eta_str = '%d days, %d hours, %d minutes, and %.2f seconds.'%(int(eta)/86400, (int(eta)/3600)%24, (int(eta)/60)%60, eta%60)
                 elif eta > 3600: #more than an hr
-                    eta_str = '%d hours, %d minutes, and %.2f seconds.'%((int(eta)/3600)%24, (int(eta)/60)%60, eta%60) 
+                    eta_str = '%d hours, %d minutes, and %.2f seconds.'%((int(eta)/3600)%24, (int(eta)/60)%60, eta%60)
                 elif eta > 60: #more than a min
                     eta_str = '%d minutes and %.2f seconds.'%((int(eta)/60)%60, eta%60)
                 else:
                     eta_str = '%.2f seconds.'%(eta)
-                    
+
                 print 'Pgen computed for %d sequences in: %s Estimated time remaining: %s'%(i+1, c_time_str, eta_str)
-        
+
         c_time = time.time() - start_time
         if c_time > 86400: #more than a day
-            c_time_str = '%d days, %d hours, %d minutes, and %.2f seconds.'%(int(c_time)/86400, (int(c_time)/3600)%24, (int(c_time)/60)%60, c_time%60) 
+            c_time_str = '%d days, %d hours, %d minutes, and %.2f seconds.'%(int(c_time)/86400, (int(c_time)/3600)%24, (int(c_time)/60)%60, c_time%60)
         elif c_time > 3600: #more than an hr
-            c_time_str = '%d hours, %d minutes, and %.2f seconds.'%((int(c_time)/3600)%24, (int(c_time)/60)%60, c_time%60) 
+            c_time_str = '%d hours, %d minutes, and %.2f seconds.'%((int(c_time)/3600)%24, (int(c_time)/60)%60, c_time%60)
         elif c_time > 60: #more than a min
             c_time_str = '%d minutes and %.2f seconds.'%((int(c_time)/60)%60, c_time%60)
         else:
             c_time_str = '%.2f seconds.'%(c_time)
-        print 'Completed Pgen computation for %d sequences: in %s'%(len(seqs), c_time_str) 
+        print 'Completed Pgen computation for %d sequences: in %s'%(len(seqs), c_time_str)
         outfile.close()
-    
-    
-    #Non-safe mode 
+
+
+    #Non-safe mode
     else:
         print 'Starting Pgen computation with safe mode disabled.'
         pgens_computed = 0
-        
+
         infile = open(infile_name, 'r')
         outfile = open(outfile_name, 'w')
-        
+
         start_time = time.time()
         for i, line in enumerate(infile):
             if comment_delimiter is not None: #Default case -- no comments/header delimiter
@@ -746,12 +741,12 @@ def main(argv):
                     continue
             if i < lines_to_skip:
                 continue
-            
+
             if delimiter is None: #Default delimiter is just any whitespace
                 split_line = line.split()
             else:
                 split_line = line.split(delimiter)
-            
+
             #Find seq
             try:
                 seq = split_line[seq_in_index].strip()
@@ -778,7 +773,7 @@ def main(argv):
                     infile.close()
                     outfile.close()
                     return -1
-                
+
             #Find and format J_usage_mask
             if J_mask_index is None:
                 J_usage_mask = None #default mask
@@ -791,7 +786,7 @@ def main(argv):
                     infile.close()
                     outfile.close()
                     return -1
-            
+
             if seq_type_in == 'aaseq':
                 aaseq = seq
                 #Compute Pgen and print out
@@ -806,39 +801,39 @@ def main(argv):
                     outfile.write(ntseq + delimiter_out + str(pgen_model.compute_nt_CDR3_pgen(ntseq, V_usage_mask, J_usage_mask, print_warnings)) + '\n')
                 elif seq_type_out == 'aaseq':
                     outfile.write(aaseq + delimiter_out + str(pgen_model.compute_aa_CDR3_pgen(aaseq, V_usage_mask, J_usage_mask, print_warnings)) + '\n')
-        
+
             pgens_computed += 1
             #Print time update
             if (pgens_computed)%seqs_per_time_update == 0 and time_updates:
                 c_time = time.time() - start_time
                 if c_time > 86400: #more than a day
-                    c_time_str = '%d days, %d hours, %d minutes, and %.2f seconds.'%(int(c_time)/86400, (int(c_time)/3600)%24, (int(c_time)/60)%60, c_time%60) 
+                    c_time_str = '%d days, %d hours, %d minutes, and %.2f seconds.'%(int(c_time)/86400, (int(c_time)/3600)%24, (int(c_time)/60)%60, c_time%60)
                 elif c_time > 3600: #more than an hr
-                    c_time_str = '%d hours, %d minutes, and %.2f seconds.'%((int(c_time)/3600)%24, (int(c_time)/60)%60, c_time%60) 
+                    c_time_str = '%d hours, %d minutes, and %.2f seconds.'%((int(c_time)/3600)%24, (int(c_time)/60)%60, c_time%60)
                 elif c_time > 60: #more than a min
                     c_time_str = '%d minutes and %.2f seconds.'%((int(c_time)/60)%60, c_time%60)
                 else:
                     c_time_str = '%.2f seconds.'%(c_time)
-                
-                    
-                print 'Pgen computed for %d sequences in %s'%(pgens_computed, c_time_str)        
-            
+
+
+                print 'Pgen computed for %d sequences in %s'%(pgens_computed, c_time_str)
+
             if max_number_of_seqs is not None:
                 if pgens_computed >= max_number_of_seqs:
                     break
-            
+
         c_time = time.time() - start_time
         if c_time > 86400: #more than a day
-            c_time_str = '%d days, %d hours, %d minutes, and %.2f seconds.'%(int(c_time)/86400, (int(c_time)/3600)%24, (int(c_time)/60)%60, c_time%60) 
+            c_time_str = '%d days, %d hours, %d minutes, and %.2f seconds.'%(int(c_time)/86400, (int(c_time)/3600)%24, (int(c_time)/60)%60, c_time%60)
         elif c_time > 3600: #more than an hr
-            c_time_str = '%d hours, %d minutes, and %.2f seconds.'%((int(c_time)/3600)%24, (int(c_time)/60)%60, c_time%60) 
+            c_time_str = '%d hours, %d minutes, and %.2f seconds.'%((int(c_time)/3600)%24, (int(c_time)/60)%60, c_time%60)
         elif c_time > 60: #more than a min
             c_time_str = '%d minutes and %.2f seconds.'%((int(c_time)/60)%60, c_time%60)
         else:
             c_time_str = '%.2f seconds.'%(c_time)
-        print 'Completed Pgen computation for %d sequences in %s'%(pgens_computed, c_time_str) 
-        
+        print 'Completed Pgen computation for %d sequences in %s'%(pgens_computed, c_time_str)
+
         infile.close()
         outfile.close()
 
-if __name__ == '__main__': main(sys.argv)
+if __name__ == '__main__': main()

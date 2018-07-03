@@ -4,99 +4,101 @@ OLGA is a python 2.7 software developed to compute the generation probability of
 
 ## Motivation
 
-The recent ubiquity in adaptive immune system repertoire sequencing has led to the need for a variety of probabilistic and bioinformatic tools to analyze CDR3 sequence. Of particular interest are the generative models of V(D)J recombination and an inference procedure first introduced in *CITE ANAND PAPER*. Recently, a more complete and efficient software package IGoR (Inference and Generation Of Repertoires) was published *CITE QUENTIN PAPER* and is available on GitHub [(IGoR)](https://github.com/qmarcou/IGoR) and should be used for any generative model inference.
+The recent ubiquity in adaptive immune system repertoire sequencing has led to the need for a variety of probabilistic and bioinformatic tools to analyze CDR3 sequence. Of particular interest are the generative models of V(D)J recombination and an inference procedure first introduced in [Murugan 2012](http://www.pnas.org/content/early/2012/09/10/1212755109.short). Recently, a more complete and efficient software package IGoR (Inference and Generation Of Repertoires) was published [(Marcou 2018)](http://www.nature.com/articles/s41467-018-02832-w) and is available on GitHub [(IGoR)](https://github.com/qmarcou/IGoR) and should be used for any generative model inference.
 
 This software implements the dynamic programming algorithm discussed *CITE PAPER* to compute the generation probability of amino acid and in-frame nucleotide CDR3 sequences.
 
-As adaptive repertoire researchers span the full gamut of technical coding skills, the goal of this README and software is to be as usable and useful as possible for researchers with any programming background. To this end, the core algorithm provided as Python modules with a few command line executable scripts provided. The technical user can thus import the Python modules and incorporate them into their own analysis pipeline while the researcher who only needs a more cursory analysis can use the provided command line scripts. (Furthermore, there is a functional/procedural implementation of the algorithm -- please contact via email if you prefer the modules structured in this manner).
+As adaptive repertoire researchers span the full gamut of technical coding skills, the goal of this README and software is to be as usable and useful as possible for researchers with any programming background. To this end, the core algorithm provided as Python modules with a few command line console scripts provided. The technical user can thus import the Python modules and incorporate them into their own analysis pipeline while the researcher who only requires a cursory analysis can use the provided console scripts. (Furthermore, there is a functional/procedural implementation of the algorithm -- please contact via email if you prefer the modules structured in this manner).
 
 Documentation and examples provided below, and assumes only minimal familiarity with Python/Bash. Ideally, even the interested party who is very uncomfortable with coding should be able to manage from the examples.
 
 ## Installation
-
-THIS WILL CHANGE when pip -install is up and running
-
 OLGA is a python 2.7 software which only uses standard python libraries and requires no additional dependencies.
 
-The executable functions will assume a particular directory architecture. The minimal directory structure should be as follows:
+OLGA is available on PyPI and can be downloaded and installed through pip: ```pip -install olga```
 
+OLGA is also available on [GitHub](https://github.com/zsethna/OLGA). The command line entry points can be installed by using the setup.py script: ```$ python setup.py install```. If the command line console scripts are not wanted, no installation is necessary and the scripts ```run_pgen.py```, ```compute_single_sequence_pgen.py```, and ```generate_synthetic_sequences.py``` can all be run as executables.
+
+
+
+Directory architecture:
 ```
 olga/
 │   README.md
-│   run_pgen.py
-│   compute_single_sequence_pgen.py
-│   generate_synthetic_sequences.py    
+│   LICENSE
+│   setup.py
+│   example_expanded_amino_acid_alphabet.txt  
 │
 └───olga/
-│       generation_probability.py
-│       preprocess_generative_model_and_data.py
-│       load_model.py
-|       sequence_generation.py
-│   
-└───models/
-    └───human_T_alpha/
-    │       model_marginals.txt
-    │       model_params.txt
-    │       J_gene_CDR3_anchors.txt
-    │       V_gene_CDR3_anchors.txt
+    │   __init__.py
+    │   run_pgen.py
+    │   compute_single_sequence_pgen.py
+    │   generate_synthetic_sequences.py
+    │   generation_probability.py
+    │   preprocess_generative_model_and_data.py
+    │   load_model.py
+    │   sequence_generation.py
     │
-    └───human_T_beta/
-    │       model_marginals.txt
-    │       model_params.txt
-    │       J_gene_CDR3_anchors.txt
-    │       V_gene_CDR3_anchors.txt
-    │
-    └───human_B_heavy/
-    │       model_marginals.txt
-    │       model_params.txt
-    │       J_gene_CDR3_anchors.txt
-    │       V_gene_CDR3_anchors.txt
-    │
-    └───mouse_T_beta/
-            model_marginals.txt
-            model_params.txt
-            J_gene_CDR3_anchors.txt
-            V_gene_CDR3_anchors.txt
+    └───default_models/
+        └───human_T_alpha/
+        │       model_marginals.txt
+        │       model_params.txt
+        │       J_gene_CDR3_anchors.txt
+        │       V_gene_CDR3_anchors.txt
+        │
+        └───human_T_beta/
+        │       model_marginals.txt
+        │       model_params.txt
+        │       J_gene_CDR3_anchors.txt
+        │       V_gene_CDR3_anchors.txt
+        │
+        └───human_B_heavy/
+        │       model_marginals.txt
+        │       model_params.txt
+        │       J_gene_CDR3_anchors.txt
+        │       V_gene_CDR3_anchors.txt
+        │
+        └───mouse_T_beta/
+                model_marginals.txt
+                model_params.txt
+                J_gene_CDR3_anchors.txt
+                V_gene_CDR3_anchors.txt
 ```
 
-OLGA also ships with a few extra folders (data/, results/, extended_alphabet_files/) for example calls and organizational ease.
+## Command line console scripts and Examples
 
-## Executable Code and Examples
-
-There are three included executable command line scripts:
-1. compute_single_sequence_pgen.py
+There are three command line console scripts (the scripts can still be called as executables if OLGA is not installed):
+1. olga-compute_single_sequence_pgen
   * computes the generation probability of a single sequence.
-2. run_pgen.py
+2. olga-run_pgen
   * computes the generation probability of sequences read from a file and outputs the results to another file.
-3. generate_synthetic_sequences.py
+3. olga-generate_synthetic_sequences
   * generates sequences and writes them to a file.
 
-For any of them you can execute with the -h or --help flags to get the options (e.g. ```$ ./compute_single_sequence_pgen.py -h```), or query with pydoc for the full docstring documentation (e.g. ```$ pydoc compute_single_sequence_pgen```).
+For any of them you can execute with the -h or --help flags to get the options.
 
+### Quick Demo
+After installing OLGA, we offer a quick demonstration of the console scripts. This will demonstrate generating sequences and computing pgens from the default model for human TCR beta chains that ships with OLGA. This demo will generate two files, example_seqs.tsv and example_pgens.tsv, in the directory that these command line calls are made.
 
-### Quick Tutorial (Unix/Mac)
-Before getting into the weeds of the arguments of the command line scripts, let us first do a quick copy-paste tutorial for people who are uncomfortable with Python (just input the lines into a bash shell). This will demonstrate generating sequences and computing pgens from the default model for human TCR beta chains that ships with NAME.
-
-1. ./compute_single_sequence_pgen.py CASSLGRDGGHEQYF --humanTCRB
+1. ```$ olga-compute_single_sequence_pgen CASSLGRDGGHEQYF --humanTCRB```
   * This computes the pgen of the amino acid sequence CASSLGRDGGHEQYF (you should get 7.25342176315e-10)
 
-2. ./generate_synthetic_sequences.py data/example_seqs.tsv --humanTCRB -n 1e3
+2. ```$ olga-generate_synthetic_sequences.py example_seqs.tsv --humanTCRB -n 1e3```
   * This generates a file example_seqs.tsv with 1000 human TCRB CDR3 sequences (both the nucleotide sequence and the amino acid sequence) along with the V and J genes used to generate them.
 
-3. ./run_pgen.py data/example_seqs.tsv results/example_pgens.tsv --humanTCRB
-  * This reads in the file we just generated, exampe_seqs.tsv, and computes both the nucleotide sequence and the amino acid sequence pgen for each of the 1000 sequences we generated and writes it to the file example_pgens.tsv.
+3. ```$ olga-run_pgen example_seqs.tsv example_pgens.tsv --humanTCRB```
+  * This reads in the file we just generated, example_seqs.tsv, and computes both the nucleotide sequence and the amino acid sequence pgen for each of the 1000 sequences we generated and writes it to the file example_pgens.tsv.
 
 Did it work? If not, check these issues:
 * Do you have Python 2.7? (Should be built into the OS for Unix/Mac)
-* Is the directory structure correct?
-* Are the scripts executable?
-  * Can also try executing the scripts through python:
-    1. python compute_single_sequence_pgen.py CASSLGRDGGHEQYF --humanTCRB
-    2. python generate_synthetic_sequences.py data/example_seqs.tsv --humanTCRB -n 1e3
-    3. python run_pgen.py data/example_seqs.tsv results/example_pgens.tsv --humanTCRB
+* Is OLGA installed?
+  * If OLGA is not 'installed,' the scripts can still be called as executables (or through python):
+    1. ```$ ./compute_single_sequence_pgen.py CASSLGRDGGHEQYF --humanTCRB```
+    2. ```$ ./generate_synthetic_sequences.py example_seqs.tsv --humanTCRB -n 1e3```
+    3. ```$ ./run_pgen.py example_seqs.tsv example_pgens.tsv --humanTCRB```
 
 ### Specifying a default V(D)J model (or a custom model folder)
-All of the executables will require specifying a V(D)J generative model and genomic data. OLGA ships with 4 default models that can be indicated by flags, or a custom model folder can be indicated.
+All of the console scripts require specifying a V(D)J generative model and genomic data. OLGA ships with 4 default models that can be indicated by flags, or a custom model folder can be indicated.
 
 | Options                                        | Description                                      |
 |------------------------------------------------|--------------------------------------------------|
@@ -117,30 +119,30 @@ with the exact naming convention:
 * V_gene_CDR3_anchors.csv (V residue anchor and functionality file)
 * J_gene_CDR3_anchors.csv (J residue anchor and functionality file)
 
-The executable functions can only read files of the assumed IGoR/anchor.csv syntaxes. In order to read in models from files of other formats, please read the discussion in the Python module section and the documentation of load_model.py.
+The console scripts can only read files of the assumed IGoR/anchor.csv syntaxes. In order to read in models from files of other formats, please read the discussion in the Python module section and the documentation of load_model.py.
 
 ### compute_single_sequence_pgen.py
 
-syntax: ```./compute_single_sequence_pgen.py CDR3_SEQ **kwarg ```
+syntax: ```olga-compute_single_sequence_pgen CDR3_SEQ **kwarg ```
 
-This command line program is used to compute the generation probability (Pgen) of a single CDR3 sequence as defined by a provided generative V(D)J model. The sequence itself can be an 'amino acid' sequence, an in-frame nucleotide sequence, or an 'amino acid' regular expression.
+This console script is used to compute the generation probability (Pgen) of a single CDR3 sequence as defined by a provided generative V(D)J model. The sequence itself can be an 'amino acid' sequence, an in-frame nucleotide sequence, or an 'amino acid' regular expression.
 
-The CDR3 sequence is the first argument. The program has a minimal sequence parser that will guess if the inputted sequence is an 'amino acid' sequence, a nucleotide sequence, or a regular expression and the printed output will indicate what the parser interpreted the sequence to be (note that backslashes were needed to specify the brackets in the regular expression example below {}).
+The CDR3 sequence is the first argument. The program has a minimal sequence parser that will guess if the inputted sequence is an 'amino acid' sequence, a nucleotide sequence, or a regular expression and the printed output will indicate what the parser interpreted the sequence to be.
 
 It is also possible to restrict the Pgen computation to specified V and/or J genes or alleles (to reflect any alignment outside of the CDR3 region) by using the options -v or -j (see example below). You can specify multiple V or J genes/alleles by using a comma as a delimiter.
 
-The only required inputs are the sequence and specifying the generative V(D)J model. Additional options can be found by using -h or pydoc.
+The only required inputs are the sequence and specifying the generative V(D)J model. Additional options can be found by using -h.
 
 Examples:
 ```
-$ ./compute_single_sequence_pgen.py CASSLGRDGGHEQYF --humanTCRB
+$ olga-compute_single_sequence_pgen CASSLGRDGGHEQYF --humanTCRB
 
 ------------------------------------------------------------------------------------------
 Pgen of the amino acid sequence CASSLGRDGGHEQYF: 7.25342176315e-10
 ------------------------------------------------------------------------------------------
 
 
-$ ./compute_single_sequence_pgen.py TGTGCCAGCAGCTTAGGTAGGGATGGAGGTCACGAGCAGTACTTC --humanTCRB
+$ olga-compute_single_sequence_pgen TGTGCCAGCAGCTTAGGTAGGGATGGAGGTCACGAGCAGTACTTC --humanTCRB
 
 ------------------------------------------------------------------------------------------
 Pgen of the nucleotide sequence TGTGCCAGCAGCTTAGGTAGGGATGGAGGTCACGAGCAGTACTTC: 8.50807296092e-14
@@ -148,14 +150,14 @@ Pgen of the amino acid sequence nt2aa(TGTGCCAGCAGCTTAGGTAGGGATGGAGGTCACGAGCAGTAC
 ------------------------------------------------------------------------------------------
 
 
-$ ./compute_single_sequence_pgen.py CASSLX\{0,5\}DG[GAR]HEQYF --humanTCRB
+$ olga-compute_single_sequence_pgen CASSLX\{0,5\}DG[GAR]HEQYF --humanTCRB
 
 ------------------------------------------------------------------------------------------
 Pgen of the regular expression sequence CASSLX{0,5}DG[GAR]HEQYF: 2.42813803819e-07
 ------------------------------------------------------------------------------------------
 
 
-$ ./compute_single_sequence_pgen.py CASSLGRDGGHEQYF --humanTCRB -v TRBV11-1 -j TRBJ2-7
+$ olga-compute_single_sequence_pgen.py CASSLGRDGGHEQYF --humanTCRB -v TRBV11-1 -j TRBJ2-7
 
 ------------------------------------------------------------------------------------------
 Pgen of the amino acid sequence CASSLGRDGGHEQYF: 6.66613706172e-12
@@ -163,7 +165,7 @@ Pgen of the amino acid sequence CASSLGRDGGHEQYF: 6.66613706172e-12
 (Conditioned on the V and J gene/allele usages: ['TRBV11-1'], ['TRBJ2-7'])
 ------------------------------------------------------------------------------------------
 
-$ ./compute_single_sequence_pgen.py CASSLGRDGGHEQYF --humanTCRB -v TRBV2,TRBV11-1 -j TRBJ2-7,not_a_J_gene
+$ olga-compute_single_sequence_pgen CASSLGRDGGHEQYF --humanTCRB -v TRBV2,TRBV11-1 -j TRBJ2-7,not_a_J_gene
 
 Unfamiliar J gene/allele: not_a_J_gene
 ------------------------------------------------------------------------------------------
@@ -177,9 +179,9 @@ Pgen of the amino acid sequence CASSLGRDGGHEQYF: 7.93830612446e-12
 
 ### run_pgen.py
 
-syntax: ```./run_pgen.py PATH/TO/INFILE PATH/TO/OUTFILE **kwarg ```
+syntax: ```olga-run_pgen PATH/TO/INFILE PATH/TO/OUTFILE **kwarg ```
 
-This command line program is used to compute the generation probabilities (Pgens), as defined by a specified generative V(D)J model, of CDR3 sequences from a file and writes the output to another file. The infile is assumed to be a DELIMITER SPACED VALUE file (e.g. a tab separated file .tsv or a comma separated file .csv, though other delimiters can be specified. For more info read the options/docstring).
+This console script is used to compute the generation probabilities (Pgens), as defined by a specified generative V(D)J model, of CDR3 sequences from a file and writes the output to another file. The infile is assumed to be a DELIMITER SPACED VALUE file (e.g. a tab separated file .tsv or a comma separated file .csv, though other delimiters can be specified. For more info read the options/docstring).
 
 The CDR3 sequences can be either 'amino acid' sequences or in-frame nucleotide sequences and are read in as a specific column of each line (as defined by the delimiter). The default index for the sequence column is 0 (the first column) to ensure that a file composed of only a single sequence on each line will be correctly read in by default.
 
@@ -193,17 +195,17 @@ Further documentation of additional options along with more examples can be foun
 
 Examples:
 ```
-$ ./run_pgen.py data/example_seqs.tsv results/example_pgen.tsv --humanTCRB
+$ olga-run_pgen example_seqs.tsv example_pgen.tsv --humanTCRB
 
-$ ./run_pgen.py data/example_seqs.tsv results/example_pgen.tsv --humanTCRB -seq_in_index 1
+$ olga-run_pgen example_seqs.tsv example_pgen.tsv --humanTCRB -seq_in_index 1
 
 ```
 
 ### generate_synthetic_sequences.py
 
-syntax: ```./generate_synthetic_sequences.py PATH/TO/OUTFILE **kwarg```
+syntax: ```olga-generate_synthetic_sequences PATH/TO/OUTFILE **kwarg```
 
-This command line program generates a file of CDR3 sequences generated from Monte Carlo sampling of a specified generative V(D)J model.
+This console script generates a file of CDR3 sequences generated from Monte Carlo sampling of a specified generative V(D)J model.
 
 Required inputs are the PATH/TO/OUTFILE (assumed to be the first argument), the number of sequences to generate, and specifying the generative V(D)J model.
 
@@ -211,11 +213,11 @@ Further documentation of all options along with more examples can be found in th
 
 Example:
 ```
-$ ./generate_synthetic_sequences.py data/example_seqs.tsv --humanTCRB -n 1e4
+$ olga-generate_synthetic_sequences data/example_seqs.tsv --humanTCRB -n 1e3
 
 ```
 
-## Using the OLGA modules in a Python script
+## Using the OLGA modules in a Python script (advanced users)
 In order to incorporate the core algorithm into an analysis pipeline (or to write your own script wrappers) all that is needed is to import the modules and load up a generative model. Each module defines some classes that only a few methods get called on.
 
 As the generative model structure is different between VDJ recombination and VJ recombination the algorithms to compute Pgen for the two are different. For this reason, different objects are defined for VDJ recombination models and VJ recombination models, however the *methods* that get called are the same.
@@ -246,10 +248,10 @@ Here is an example of loading the default human TCRB model to compute some seque
 >>> import olga.sequence_generation as seq_gen
 >>>
 >>> #Define the files for loading in generative model/data
-... params_file_name = './models/human_T_beta/model_params.txt'
->>> marginals_file_name = './models/human_T_beta/model_marginals.txt'
->>> V_anchor_pos_file ='./models/human_T_beta/V_gene_CDR3_anchors.csv'
->>> J_anchor_pos_file = './models/human_T_beta/J_gene_CDR3_anchors.csv'
+... params_file_name = 'default_models/human_T_beta/model_params.txt'
+>>> marginals_file_name = 'default_models/human_T_beta/model_marginals.txt'
+>>> V_anchor_pos_file ='default_models/human_T_beta/V_gene_CDR3_anchors.csv'
+>>> J_anchor_pos_file = 'default_models/human_T_beta/J_gene_CDR3_anchors.csv'
 >>>
 >>> #Load data
 ... genomic_data = load_model.GenomicDataVDJ()
@@ -301,9 +303,9 @@ To facilitate adding to the base alphabet files of a particular syntax can be sp
 symbolA: list,of,amino,acids,or,codons,separated,by,commas
 symbolB: another,comma,delimited,list
 ```
-etc, where symbolA and symbolB are single characters and aren't one of the protected characters. Please see utils.py for more documentation, and the options for the executable functions to see how to call such alphabet files.
+etc, where symbolA and symbolB are single characters and aren't one of the protected characters. Please see utils.py for more documentation, and the options of the console scripts to see how to call such alphabet files.
 
-In addition to allowing customization of the 'amino acid' alphabet, we include functions that can parse regular expressions with a limited vocabulary. In particular only [] and {} are supported (the symbol for a Kleene star, \*, is reserved for stop codons). The sequences corresponding to the regular expression can then be enumerated and their Pgens summed. Note, this can be slow as Pgen must be computed for each of the enumerated sequences independently. If a particular combination of amino acids is being used in a [] frequently consider defining a symbol for that combination and adding it to the alphabet. For example the regular expression 'CASS**[ACDEFGHIKLMNPQRSTVWY]**SARPEQFF' will list out 20 sequences, but its Pgen could be computed by considering the single CDR3 sequence 'CASS**X**SARPEQFF' Please see documentation in pgen.py for more info and examples.
+In addition to allowing customization of the 'amino acid' alphabet, we include functions that can parse regular expressions with a limited vocabulary. In particular only [] and {} are supported (the symbol for a Kleene star, \*, must be reserved for stop codons). The sequences corresponding to the regular expression can then be enumerated and their Pgens summed. Note, this can be slow as Pgen must be computed for each of the enumerated sequences independently. If a particular combination of amino acids is being used in a [] frequently you may consider defining a symbol for that combination and adding it to the alphabet. For example the regular expression 'CASS**[ACDEFGHIKLMNPQRSTVWY]**SARPEQFF' will list out 20 sequences, but its Pgen could be computed by considering the single CDR3 sequence 'CASS**X**SARPEQFF' Please see documentation in pgen.py for more info and examples.
 
 ## Contact
 
