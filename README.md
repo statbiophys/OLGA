@@ -16,9 +16,7 @@ Documentation and examples provided below, and assumes only minimal familiarity 
 Latest released version: 0.1.0
 
 ## Installation
-OLGA is a python 2.7 software which only uses standard python libraries and requires no additional dependencies.
-
-OLGA is available on PyPI and can be downloaded and installed through pip: ```pip -install olga```
+OLGA is a python 2.7 software which only uses standard python libraries and requires no additional dependencies. It is available on PyPI and can be downloaded and installed through pip: ```pip -install olga```.
 
 OLGA is also available on [GitHub](https://github.com/zsethna/OLGA). The command line entry points can be installed by using the setup.py script: ```$ python setup.py install```. If the command line console scripts are not wanted, no installation is necessary and the scripts ```run_pgen.py```, ```compute_single_sequence_pgen.py```, and ```generate_synthetic_sequences.py``` can all be run as executables.
 
