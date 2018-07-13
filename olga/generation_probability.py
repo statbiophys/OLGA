@@ -564,7 +564,7 @@ class GenerationProbability(object):
                         new_expression = [int(ex.strip('{}').split(',')[0]), default_max_reps, syms]
                     if new_expression[0] > new_expression[1]:
                         if print_warnings:
-                            print 'Check regex syntax --- should be {min, max}'
+                            print 'Check regex syntax --- should be {min,max}'
                         return []
                     max_num_seqs *= sum([len(syms)**n for n in range(new_expression[0], new_expression[1]+1)])/len(syms)
                 #print new_expression

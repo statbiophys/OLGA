@@ -7,7 +7,7 @@ def readme():
 data_files_to_include = [('', ['README.md', 'LICENSE', 'example_expanded_amino_acid_alphabet.txt'])]
 
 setup(name='olga',
-      version='0.1.0',
+      version='1.0.0',
       description='Compute generation probability of CDR3 sequences',
       long_description=readme(),
       url='https://github.com/zsethna/OLGA',
@@ -37,8 +37,7 @@ setup(name='olga',
       data_files = data_files_to_include,
       include_package_data=True,
       entry_points = {'console_scripts': [
-            'olga-compute_single_sequence_pgen=olga.compute_single_sequence_pgen:main',
-            'olga-run_pgen=olga.run_pgen:main',
-            'olga-generate_synthetic_sequences=olga.generate_synthetic_sequences:main'
+            'olga-compute_pgen=olga.compute_pgen:main',
+            'olga-generate_sequences=olga.generate_sequences:main'
             ], },
       zip_safe=False)
