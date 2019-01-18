@@ -95,7 +95,7 @@ Options:
                         specify the number of sequences between time updates.
                         Default is 1e5
   --conserved_J_residues=CONSERVED_J_RESIDUES
-                        specify conserved J residues. Default is 'FW'.
+                        specify conserved J residues. Default is 'FVW'.
   --time_updates_off    turn time updates off.
   --seq_type=SEQ_TYPE   declare sequence type for output sequences. Choices:
                         'all' [default], 'ntseq', 'nucleotide', 'aaseq',
@@ -120,7 +120,7 @@ acids are used to define this 'conserved residue' in the string here, but
 the J genes are still anchored at a 'F' or 'W' (as the default genomic
 files are), this could result in no productive sequences being generated.
 Unless the anchor positions are changed, LEAVE THE DEFAULT. The default
-string is 'FW'.
+string is 'FVW'.
 
 --------------------------------------------------------------------------------
 
@@ -157,7 +157,7 @@ def main():
     parser.add_option('-n', '--num_seqs', type='float', metavar='N', default = 0, dest='num_seqs_to_generate', help='specify the number of sequences to generate.')
     parser.add_option('--seed', type='int', dest='seed', help='set seed for pseudorandom number generator. Default is to not set a seed.')
     parser.add_option('--seqs_per_time_update', type='float', default = 100000, dest='seqs_per_time_update', help='specify the number of sequences between time updates. Default is 1e5')
-    parser.add_option('--conserved_J_residues', type='string', default = 'FW', dest='conserved_J_residues', help="specify conserved J residues. Default is 'FW'.")
+    parser.add_option('--conserved_J_residues', type='string', default = 'FVW', dest='conserved_J_residues', help="specify conserved J residues. Default is 'FVW'.")
     parser.add_option('--time_updates_off', action='store_false', dest='time_updates', default=True, help='turn time updates off.')
     parser.add_option('--seq_type', type='choice', default = 'all', dest='seq_type',  choices=['all', 'ntseq', 'nucleotide', 'aaseq', 'amino_acid'], help="declare sequence type for output sequences. Choices: 'all' [default], 'ntseq', 'nucleotide', 'aaseq', 'amino_acid'")
     parser.add_option('--record_genes_off', action='store_false', dest="record_genes", default=True, help='turn off recording V and J gene info.')

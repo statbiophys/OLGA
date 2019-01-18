@@ -7,12 +7,12 @@ def readme():
 data_files_to_include = [('', ['README.md', 'LICENSE', 'example_expanded_amino_acid_alphabet.txt'])]
 
 setup(name='olga',
-      version='1.0.1',
+      version='1.0.2',
       description='Compute generation probability of CDR3 sequences',
       long_description=readme(),
       url='https://github.com/zsethna/OLGA',
       author='Zachary Sethna',
-      author_email='sethna@princeton.edu',
+      author_email='zachary.sethna@gmail.com',
       license='GPLv3',
       classifiers=[
             'Development Status :: 3 - Alpha',

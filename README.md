@@ -13,7 +13,7 @@ As adaptive repertoire researchers span the full gamut of technical coding skill
 Documentation and examples provided below. Ideally, even the interested party who is uncomfortable with coding should be able to manage from the examples.
 
 ## Version
-Latest released version: 1.0.1
+Latest released version: 1.0.2
 
 ## Installation
 OLGA is a python 2.7 software which only uses standard python libraries and requires no additional dependencies. It is available on PyPI and can be downloaded and installed through pip: ```pip install olga```.
@@ -385,7 +385,7 @@ In addition to allowing customization of the 'amino acid' alphabet, we include f
 
 ## Contact
 
-Any issues or questions should be addressed to [us](mailto:sethna@princeton.edu).
+Any issues or questions should be addressed to [us](mailto:zachary.sethna@gmail.com).
 
 ## License
 
