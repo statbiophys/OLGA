@@ -2,6 +2,12 @@
 # -*- coding: utf-8 -*-
 """Module for Monte Carlo generation of sequences from a V(D)J recomb model.
 
+    tcrdist2 authors UPDATED THE FOLLOWING CODE TO PYTHON 3
+    USING COMMIT e825c333f0f9a4eb02132e0bcf86f0dca9123114 (Jan 18, 2019)
+
+    ORIGINAL OLGA CODE CAN BE FOUND AT:
+    https://github.com/zsethna/OLGA
+
     Copyright (C) 2018 Zachary Sethna
 
     This program is free software: you can redistribute it and/or modify
@@ -59,7 +65,7 @@ Example
 @author: zacharysethna
 """
 import numpy as np
-from utils import nt2aa, calc_steady_state_dist
+from .utils import nt2aa, calc_steady_state_dist
 
 class SequenceGenerationVDJ(object):
     """Class of to generate sequences from a VDJ generative model.
@@ -152,10 +158,10 @@ class SequenceGenerationVDJ(object):
         self.given_J_CPdelJ = generative_model.PdelJ_given_J.T.cumsum(axis = 1)
 
         for D in range(generative_model.PdelDldelDr_given_D.shape[2]):
-            if np.sum(generative_model.PdelDldelDr_given_D[:,  :, D]) > 0:
-                generative_model.PdelDldelDr_given_D[:, :, D] = generative_model.PdelDldelDr_given_D[:, :, D]/float(np.sum(generative_model.PdelDldelDr_given_D[:, :, D]))
+            if np.sum(generative_model.PdelDldelDr_given_D[:,:, D]) > 0:
+                generative_model.PdelDldelDr_given_D[:,:, D] = generative_model.PdelDldelDr_given_D[:,:, D]/float(np.sum(generative_model.PdelDldelDr_given_D[:,:, D]))
 
-        self.given_D_CPdelDldelDr = np.array([ generative_model.PdelDldelDr_given_D[:, :, i].flatten().cumsum() for i in range(generative_model.PdelDldelDr_given_D.shape[2])])
+        self.given_D_CPdelDldelDr = np.array([ generative_model.PdelDldelDr_given_D[:,:, i].flatten().cumsum() for i in range(generative_model.PdelDldelDr_given_D.shape[2])])
 
 
         self.C_Rvd = generative_model.Rvd.T.cumsum(axis = 1)
@@ -263,18 +269,18 @@ class SequenceGenerationVDJ(object):
 
         #For 2D arrays make sure to take advantage of a mod expansion to find indicies
         DJ_choice = self.CPDJ.searchsorted(np.random.random())
-        recomb_events['D'] = DJ_choice/self.num_J_genes
+        recomb_events['D'] = DJ_choice//self.num_J_genes
         recomb_events['J'] = DJ_choice % self.num_J_genes
 
 
         #Refer to the correct slices for the dependent distributions
-        recomb_events['delV'] = self.given_V_CPdelV[recomb_events['V'], :].searchsorted(np.random.random())
+        recomb_events['delV'] = self.given_V_CPdelV[recomb_events['V'],:].searchsorted(np.random.random())
 
-        recomb_events['delJ'] = self.given_J_CPdelJ[recomb_events['J'], :].searchsorted(np.random.random())
+        recomb_events['delJ'] = self.given_J_CPdelJ[recomb_events['J'],:].searchsorted(np.random.random())
 
-        delDldelDr_choice = self.given_D_CPdelDldelDr[recomb_events['D'], :].searchsorted(np.random.random())
+        delDldelDr_choice = self.given_D_CPdelDldelDr[recomb_events['D'],:].searchsorted(np.random.random())
 
-        recomb_events['delDl'] = delDldelDr_choice/self.num_delDr_poss
+        recomb_events['delDl'] = delDldelDr_choice//self.num_delDr_poss
         recomb_events['delDr'] = delDldelDr_choice % self.num_delDr_poss
 
         recomb_events['insVD'] = self.CinsVD.searchsorted(np.random.random())
@@ -441,14 +447,14 @@ class SequenceGenerationVJ(object):
 
         #For 2D arrays make sure to take advantage of a mod expansion to find indicies
         VJ_choice = self.CPVJ.searchsorted(np.random.random())
-        recomb_events['V'] = VJ_choice/self.num_J_genes
+        recomb_events['V'] = VJ_choice
         recomb_events['J'] = VJ_choice % self.num_J_genes
 
 
         #Refer to the correct slices for the dependent distributions
-        recomb_events['delV'] = self.given_V_CPdelV[recomb_events['V'], :].searchsorted(np.random.random())
+        recomb_events['delV'] = self.given_V_CPdelV[recomb_events['V'],:].searchsorted(np.random.random())
 
-        recomb_events['delJ'] = self.given_J_CPdelJ[recomb_events['J'], :].searchsorted(np.random.random())
+        recomb_events['delJ'] = self.given_J_CPdelJ[recomb_events['J'],:].searchsorted(np.random.random())
         recomb_events['insVJ'] = self.CPinsVJ.searchsorted(np.random.random())
 
         return recomb_events
@@ -496,7 +502,7 @@ def rnd_ins_seq(ins_len, C_R, CP_first_nt):
     ins_len += -1
 
     while ins_len > 0:
-        seq += num2nt[C_R[nt2num[seq[-1]], :].searchsorted(np.random.random())]
+        seq += num2nt[C_R[nt2num[seq[-1]],:].searchsorted(np.random.random())]
         ins_len += -1
 
     return seq
