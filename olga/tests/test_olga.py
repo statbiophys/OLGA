@@ -2,33 +2,41 @@
 """
 July 30, 2019 
 @kmayerb 
+Motivation
+----------
 
-To use olga with Python 3, we updated the repo using by the following:
+The OLGA code is great and the documentation is fantastic; Thanks! 
+
+I am using Olga and I needed to update the code so it would be compatible with Python 3.6 and later. I updated the code in this branch of the repo as follows:
+
+Update Method
+---------------
 
 ```
-2to3 -f all -f idioms -f ws_comma -f set_literal -v -w -n ./
+>>> 2to3 -f all -f idioms -f ws_comma -f set_literal -v -w -n ./
 ```
 
-- Then code was then manually debugged for additional issues. 
+- Then the code was  manually debugged for additional issues. 
+- Manual changes primarily involved fixing integer division in e.g x/y in Python 2.7 to a//b in Python 3.6
+- To locally test that the scripts run without compilation, default_models, compute_pgen.py, and generate_sequences.py  were copied one directory up from Olga/
 
-- Manual changes involved fixing integer division in e.g x/y in Python 2.7 to a//b in Python 3.6
+Testing
+-------
 
-- To locally test that the scripts run without compilation, 
-default_models, compute_pgen.py, and generate_sequences.py 
-were coppied one directory up from olga/
-
+```
 >>> cp ./olga/compute_pgen.py ./compute_pgen.py
 >>> cp ./olga/generate_sequences.py ./generate_sequences.py
 >>> rsync -r ./olga/default_models/ ./default_models/
+```
 
-Then using Python 3.6.8
+### Then using Python 3.6.8
+
 
 Python 3.6.8 |Anaconda, Inc.| (default, Dec 29 2018, 19:04:46) 
 [GCC 4.2.1 Compatible Clang 4.0.1 (tags/RELEASE_401/final)] on darwin
-
+```
 >>> python --version
 Python 3.6.8 :: Anaconda, Inc.
-
 >>> python compute_pgen.py --humanTRB CASSLGRDGGHEQYF
 Pgen of the amino acid sequence CASSLGRDGGHEQYF: 7.253421763151436e-10
 Completed pgen computation in: 0.02 seconds.
@@ -56,23 +64,22 @@ TGTGCCAGCAGCCAGCCGCAACTCGATTTACAGGGAGAACATTCACCCCTCCACTTT   6.757203697069712e-2
 Successfully read in and formatted 100 sequences and any V or J usages.
 ...
 Completed Pgen computation for 100 sequences: in 4.27 seconds.
+```
+
+### Comparison to Pip Installed Version of Olga on Python 2.7.11
 
 
-Comparison to Pip Installed Version of Olga on Python 2.7.11
-------------------------------------------------------------
+```
 >>> python --version
-Python 2.7.11 :: Continuum Analytics, Inc.
+Python 2.7.11:: Continuum Analytics, Inc.
 
 >>>olga-compute_pgen --humanTRB CASSLGRDGGHEQYF
 Pgen of the amino acid sequence CASSLGRDGGHEQYF: 7.253421763151438e-10
 Completed pgen computation in: 0.03 seconds.
+```
 
->>>olga-generate_sequences --humanTRB -n 5
-TGTGCCTCAAGAAATGAAAAACTGTTTTTT  CASRNEKLFF  TRBV24-1    TRBJ1-4
-TGCAGTAAACCAATCTCAGCCGTCCTGTCCACTGAAGCTTTCTTT   CSKPISAVLSTEAFF TRBV20-1    TRBJ1-1
-TGTGCCAGCAGCACCAGGACTAGATCTTTTAGGGAGACCCAGTACTTC    CASSTRTRSFRETQYF    TRBV7-9 TRBJ2-5
-TGCAGTGAAGATAGGGAGGGGGACAATGAGCAGTTCTTC CSEDREGDNEQFF   TRBV20-1    TRBJ2-1
-TGTGCCAGCAGCAACCATGGACCACCATCCGGGACAGGGTCCCTTACCGAGCAGTACTTC    CASSNHGPPSGTGSLTEQYF    TRBV13  TRBJ2-7
+
+In the event that these conversions would be useful, I am submitting them as a pull request.
 
 Some additional tests:
 """
