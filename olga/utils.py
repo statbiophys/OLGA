@@ -359,3 +359,141 @@ def calc_steady_state_dist(R):
         if np.abs(w[i] - 1) < 1e-8:
             return np.real(v[:, i] / np.sum(v[:, i]))
     return -1
+
+#%% Entropy Functions
+def calc_S(P, base):
+    """Calculate the entropy of a probability distribution in base units.
+    
+    Parameters
+    ----------
+    P : ndarray
+        Probability distribution
+    base : float
+        Base used to set entropy units. Suggestions:
+        base = 2 (entropy in bits)
+        base = e (entropy in nats)
+        base = 10 (entropy in dits)
+
+    Returns
+    -------
+    S : float
+        Entropy of P
+        
+    """
+    return np.sum([-p*np.log(p) for p in P.flatten() if p > 0])/np.log(base)
+
+def calc_S_single_gene(PG, PdelG_given_G, base = 2):
+    """Calculate the entropy of an independent gene usage and deletion dists.
+    
+    Parameters
+    ----------
+    PG : ndarray
+        Probability distribution of the usage of G-type genes (e.g PV)
+    PdelG_given_G : ndarray
+        Deletion profiles of each G gene conditioned on the gene 
+        (e.g. PdelV_given_V or PdelDldelDr_given_D)
+    base : float
+        Base used to set entropy units. Suggestions:
+        base = 2 (entropy in bits, default)
+        base = e (entropy in nats)
+        base = 10 (entropy in dits)
+
+    Returns
+    -------
+    SG : float
+        Entropy of PG (entropy of gene choice)
+    SdelG : float
+        Conditional entropy of PdelG_given_G (entropy of deletions)
+        
+    """
+    
+    SG = calc_S(PG, base)
+    SdelG = 0
+    for g, pg in enumerate(PG):
+        if pg == 0:
+            continue
+        SdelG += pg * calc_S(PdelG_given_G[..., g], base)
+        
+    return SG, SdelG
+
+def calc_S_joint_genes(PG1G2, PdelG1_given_G1, PdelG2_given_G2, base = 2):
+    """Calculate the entropy of a joint gene usage and deletion dists.
+    
+    Parameters
+    ----------
+    PG1G2 : ndarray
+        Joint probability distribution of the usage of G1-type genes and 
+        G2-type genes (e.g. PDJ or PVJ)
+    PdelG1_given_G1 : ndarray
+        Deletion profiles of each G1 gene conditioned on the gene 
+        (e.g. PdelV_given_V or PdelDldelDr_given_D)
+    PdelG2_given_G2 : ndarray
+        Deletion profiles of each G2 gene conditioned on the gene 
+        (e.g. PdelV_given_V or PdelDldelDr_given_D)
+    base : float
+        Base used to set entropy units. Suggestions:
+        base = 2 (entropy in bits, default)
+        base = e (entropy in nats)
+        base = 10 (entropy in dits)
+
+    Returns
+    -------
+    SG1G2 : float
+        Entropy of PG1G2 (entropy of gene choice)
+    SdelG1 : float
+        Conditional entropy of PdelG1_given_G1 (entropy of G1 deletions)
+    SdelG2 : float
+        Conditional entropy of PdelG2_given_G2 (entropy of G2 deletions)
+        
+    """
+
+    PG1 = np.sum(PG1G2, axis = 1)
+    PG2 = np.sum(PG1G2, axis = 0)
+    
+    SG1G2 = calc_S(PG1G2, base)
+    SdelG1 = 0
+    for g1, pg1 in enumerate(PG1):
+        if pg1 == 0:
+            continue
+        SdelG1 += pg1 * calc_S(PdelG1_given_G1[..., g1], base)
+
+    SdelG2 = 0
+    for g2, pg2 in enumerate(PG2):
+        if pg2 == 0:
+            continue
+        SdelG2 += pg2 * calc_S(PdelG2_given_G2[..., g2], base)
+        
+    return SG1G2, SdelG1, SdelG2
+
+def calc_Sins(Pins, R, base = 2):
+    """Calculate the entropy of an insertion junction.
+    
+    Currently this function computes the entropy assuming the Markov model is
+    in steady-state.
+    
+    Parameters
+    ----------
+    Pins : ndarray
+        Length distribution of the junction (e.g. PinsVD, PinsDJ, or PinsVJ)
+    R : ndarray
+        Markov transition matrix
+    base : float
+        Base used to set entropy units. Suggestions:
+        base = 2 (entropy in bits, default)
+        base = e (entropy in nats)
+        base = 10 (entropy in dits)
+
+    Returns
+    -------
+    Sins : float
+        Entropy of Pins (entropy of length distribution)
+    Smarkov : float
+        Entropy contribution of choice of nucleotides in the Markov model.
+        
+    """
+    Sins = calc_S(Pins, base)
+    p_ss = calc_steady_state_dist(R)
+    av_l_ins = np.dot(Pins, np.arange(len(Pins)))
+    Smarkov = calc_S(p_ss, base) + (av_l_ins - 1) * np.sum([p_ss[m]*calc_S(R[:, m], base) for m in range(4)])
+    
+    return Sins, Smarkov

@@ -82,7 +82,7 @@ are adapted from Quentin Marcou (author of IGoR).
 
 """
 import numpy as np
-from utils import cutR_seq, cutL_seq
+from utils import cutR_seq, cutL_seq, calc_S_single_gene, calc_S_joint_genes, calc_Sins
 
 #%% GenomicData class definitions
 class GenomicData(object):
@@ -245,14 +245,30 @@ class GenomicDataVDJ(GenomicData):
         
     """
     
-    def __init__(self):
-        """Initialize GenomicDataVJ."""
+    def __init__(self, params_file_name = None, V_anchor_pos_file = None, J_anchor_pos_file = None):
+        """Initialize GenomicDataVDJ.
+        
+        Parameters
+        ----------
+        params_file_name : str or None
+            File name for a IGOR parameter file.
+        V_anchor_pos_file_name : str or None
+            File name for the conserved residue (C) locations and functionality 
+            of each V genomic sequence.
+        J_anchor_pos_file_name : str or None
+            File name for the conserved residue (F/W) locations and 
+            functionality of each J genomic sequence.
+        
+        """
         GenomicData.__init__(self)
         
         self.genD = None
         self.delDl_palindrome = None
         self.delDr_palindrome = None 
         self.cutD_genomic_CDR3_segs = None
+        
+        if all([params_file_name is not None, V_anchor_pos_file is not None, J_anchor_pos_file is not None]):
+            self.load_igor_genomic_data(params_file_name, V_anchor_pos_file, J_anchor_pos_file)
         
     
     def load_igor_genomic_data(self, params_file_name, V_anchor_pos_file, J_anchor_pos_file):
@@ -394,9 +410,24 @@ class GenomicDataVJ(GenomicData):
         number of reverse complementary palindromic insertions appended.
         
     """
-    def __init__(self):
-        """Initialize GenomicDataVJ."""
+    def __init__(self, params_file_name = None, V_anchor_pos_file = None, J_anchor_pos_file = None):
+        """Initialize GenomicDataVJ.
+        
+        Parameters
+        ----------
+        params_file_name : str or None
+            File name for a IGOR parameter file.
+        V_anchor_pos_file_name : str or None
+            File name for the conserved residue (C) locations and functionality 
+            of each V genomic sequence.
+        J_anchor_pos_file_name : str or None
+            File name for the conserved residue (F/W) locations and 
+            functionality of each J genomic sequence.
+        
+        """
         GenomicData.__init__(self)
+        if all([params_file_name is not None, V_anchor_pos_file is not None, J_anchor_pos_file is not None]):
+            self.load_igor_genomic_data(params_file_name, V_anchor_pos_file, J_anchor_pos_file)
         
     def load_igor_genomic_data(self, params_file_name, V_anchor_pos_file, J_anchor_pos_file):
         """Set attributes by loading in genomic data from IGoR parameter file.
@@ -658,10 +689,37 @@ class GenerativeModelVDJ(object):
     first_nt_bias_insDJ : ndarray
         (4,) array of the probability distribution of the indentity of the 
         first nucleotide insertion for the DJ junction.
+    SV : float
+        Entropy of PV (in bits).
+    SdelV : float
+        Conditional entropy of PdelV_givenV (in bits).
+    SDJ : float
+        Entropy of PDJ (in bits).
+    SdelD : float
+        Conditional entropy of PdelDldelDr_given_D (in bits).
+    SdelJ : float
+        Conditional entropy of PdelJ_given_J (in bits)
+    SinsVD : float
+        Entropy of of PinsVD (in bits)
+    S_n1_markov : float
+        Entropy of the choice of nucleotides at the N1 (VD) junction (in bits).    
+    SinsDJ : float
+        Entropy of PinsDJ (in bits)
+    S_n2_markov : float
+        Entropy of the choice of nucleotides at the N2 (DJ) junction (in bits). 
+    Sscenario : float
+        Total entropy of recombination event scenarios (in bits).
     
     """
-    def __init__(self):
-        """Initialize GenerativeModelVDJ."""
+    def __init__(self, marginals_file_name = None):
+        """Initialize GenerativeModelVDJ.
+        
+        Parameters
+        ----------
+        marginals_file_name : str or None
+            File name for a IGoR model marginals file.
+            
+        """
         
         self.PV = None
         self.PinsVD = None
@@ -678,11 +736,28 @@ class GenerativeModelVDJ(object):
         self.first_nt_bias_insVD = None
         self.first_nt_bias_insDJ = None
         
+        self.SV = None
+        self.SdelV = None
+        self.SDJ = None
+        self.SdelD = None
+        self.SdelJ = None
+        self.SinsVD = None
+        self.S_n1_markov = None
+        self.SinsDJ = None
+        self.S_n2_markov = None
+        
+        self.Sscenario = None
+        
+        if marginals_file_name is not None: 
+            self.load_and_process_igor_model(marginals_file_name)
+        
     def load_and_process_igor_model(self, marginals_file_name):
         """Set attributes by reading a generative model from IGoR marginal file.
         
         Sets attributes PV, PdelV_given_V, PDJ, PdelJ_given_J, 
         PdelDldelDr_given_D, PinsVD, PinsDJ, Rvd, and Rdj.
+        Computes entropies SV, SdelV, SDJ, SdelD, SdelJ, SinsVD, S_n1_markov, 
+        SinsDJ, S_n2_markov, and Sscenario.
         
         Parameters
         ----------
@@ -730,6 +805,25 @@ class GenerativeModelVDJ(object):
         Rdj_raw = raw_model[0]['dj_dinucl'].reshape((4, 4)).T
         self.Rdj = np.multiply(Rdj_raw, 1/np.sum(Rdj_raw, axis = 0))
         
+        
+        #Compute Entropies
+        SV, SdelV = calc_S_single_gene(self.PV, self.PdelV_given_V)
+        SDJ, SdelD, SdelJ = calc_S_joint_genes(self.PDJ, self.PdelDldelDr_given_D, self.PdelJ_given_J)
+        SinsVD, S_n1_markov = calc_Sins(self.PinsVD, self.Rvd)
+        SinsDJ, S_n2_markov = calc_Sins(self.PinsDJ, self.Rdj)
+        
+        self.SV = SV
+        self.SdelV = SdelV
+        self.SDJ = SDJ
+        self.SdelD = SdelD
+        self.SdelJ = SdelJ
+        self.SinsVD = SinsVD
+        self.S_n1_markov = S_n1_markov
+        self.SinsDJ = SinsDJ
+        self.S_n2_markov = S_n2_markov
+        
+        self.Sscenario = SV + SdelV + SDJ + SdelD + SdelJ + SinsVD + S_n1_markov + SinsDJ + S_n2_markov
+        
 class GenerativeModelVJ(object):
     """Class of a VJ generative model.
     
@@ -751,9 +845,29 @@ class GenerativeModelVJ(object):
     first_nt_bias_insVJ : ndarray
         (4,) array of the probability distribution of the indentity of the 
         first nucleotide insertion for the VD junction.
+    SVJ : float
+        Entropy of PVJ (in bits).
+    SdelV : float
+        Conditional entropy of PdelV_givenV (in bits).
+    SdelJ : float
+        Conditional entropy of PdelJ_given_J (in bits).
+    SinsVJ : float
+        Entropy of PinsVJ (in bits).
+    S_n_markov : float
+        Entropy of the choice of nucleotides at the N (VJ) junction (in bits).    
+    Sscenario : float
+        Total entropy of recombination event scenarios (in bits).
     
     """
-    def __init__(self):
+    def __init__(self, marginals_file_name = None):
+        """Initialize GenerativeModelVJ.
+        
+        Parameters
+        ----------
+        marginals_file_name : str or None
+            File name for a IGoR model marginals file.
+            
+        """
         self.PVJ = None
         self.PinsVJ = None
         self.PdelV_given_V = None
@@ -763,6 +877,18 @@ class GenerativeModelVJ(object):
         #Normal IGoR inference does not infer these parameters, but allow for
         #the formal model
         self.first_nt_bias_insVJ = None
+        
+        self.SVJ = None
+        self.SdelV = None
+        self.SdelJ = None
+        self.SinsVJ = None
+        self.S_n_markov = None
+        
+        self.Sscenario = None
+
+        if marginals_file_name is not None: 
+            self.load_and_process_igor_model(marginals_file_name)
+
         
         
     def load_and_process_igor_model(self, marginals_file_name):
@@ -785,6 +911,19 @@ class GenerativeModelVJ(object):
         self.PVJ = np.multiply( raw_model[0]['j_choice'].T, raw_model[0]['v_choice']).T
         Rvj_raw = raw_model[0]['vj_dinucl'].reshape((4, 4)).T
         self.Rvj = np.multiply(Rvj_raw, 1/np.sum(Rvj_raw, axis = 0))
+        
+        
+        #Compute Entropies
+        SVJ, SdelV, SdelJ = calc_S_joint_genes(self.PVJ, self.PdelV_given_V, self.PdelJ_given_J)
+        SinsVJ, S_n_markov = calc_Sins(self.PinsVJ, self.Rvj)
+        
+        self.SVJ = SVJ
+        self.SdelV = SdelV
+        self.SdelJ = SdelJ
+        self.SinsVJ = SinsVJ
+        self.S_n_markov = S_n_markov
+        
+        self.Sscenario = SVJ + SdelV + SdelJ + SinsVJ + S_n_markov
 
 #%% Function for reading in IGoR marginal files        
 def read_igor_marginals_txt(marginals_file_name , dim_names=False):

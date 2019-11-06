@@ -420,9 +420,13 @@ class GenerationProbability(object):
                 try:
                     e_V_usage_mask = e_V_usage_mask.union(self.V_mask_mapping[v])
                 except KeyError:
-                    if print_warnings:
-                        print 'Unfamiliar V gene/allele: ' + v
-                    pass
+                    try:
+                        c_num_gene = '-'.join([str(int(y)) for y in v.lower().split('v')[-1].split('-')])
+                        e_V_usage_mask = e_V_usage_mask.union(self.V_mask_mapping[c_num_gene])
+                    except:
+                        if print_warnings:
+                            print 'Unfamiliar V gene/allele: ' + v
+                        pass
             if len(e_V_usage_mask) == 0:
                 if print_warnings:
                     print 'No recognized V genes/alleles. Using default V_usage_mask'
@@ -433,10 +437,14 @@ class GenerationProbability(object):
             try:
                 V_usage_mask = self.V_mask_mapping[V_usage_mask_in]
             except KeyError:
-                #Do raise error here as the mask will be empty
-                if print_warnings:
-                    print 'Unfamiliar V usage mask: ' + str(V_usage_mask_in) + ', please check the allowed V alleles. Using default V_usage_mask'
-                V_usage_mask = self.d_V_usage_mask
+                try:
+                    c_num_gene = '-'.join([str(int(y)) for y in V_usage_mask_in.lower().split('v')[-1].split('-')])
+                    V_usage_mask = self.V_mask_mapping[c_num_gene]
+                except:
+                    #Do raise error here as the mask will be empty
+                    if print_warnings:
+                        print 'Unfamiliar V usage mask: ' + str(V_usage_mask_in) + ', please check the allowed V alleles. Using default V_usage_mask'
+                    V_usage_mask = self.d_V_usage_mask
                 
                 
         #Format the J usage mask
@@ -449,9 +457,13 @@ class GenerationProbability(object):
                 try:
                     e_J_usage_mask = e_J_usage_mask.union(self.J_mask_mapping[j])
                 except KeyError:
-                    if print_warnings:
-                        print 'Unfamiliar J gene/allele: ' + j
-                    pass
+                    try:
+                        c_num_gene = '-'.join([str(int(y)) for y in j.lower().split('j')[-1].split('-')])
+                        e_J_usage_mask = e_J_usage_mask.union(self.J_mask_mapping[c_num_gene])
+                    except:
+                        if print_warnings:
+                            print 'Unfamiliar J gene/allele: ' + j
+                        pass
             if len(e_J_usage_mask) == 0:
                 if print_warnings:
                     print 'No recognized J genes/alleles. Using default J_usage_mask'
@@ -462,10 +474,14 @@ class GenerationProbability(object):
             try:
                 J_usage_mask = self.J_mask_mapping[J_usage_mask_in]
             except KeyError:
-                #Do raise error here as the mask will be empty
-                if print_warnings:
-                    print 'Unfamiliar J usage mask: ' + str(J_usage_mask_in) + ', please check the allowed J alleles. Using default J_usage_mask'
-                J_usage_mask = self.d_J_usage_mask
+                try:
+                    c_num_gene = '-'.join([str(int(y)) for y in J_usage_mask_in.lower().split('j')[-1].split('-')])
+                    J_usage_mask = self.J_mask_mapping[c_num_gene]
+                except:
+                    #Do raise error here as the mask will be empty
+                    if print_warnings:
+                        print 'Unfamiliar J usage mask: ' + str(J_usage_mask_in) + ', please check the allowed J alleles. Using default J_usage_mask'
+                    J_usage_mask = self.d_J_usage_mask
                 
         return V_usage_mask, J_usage_mask
     
