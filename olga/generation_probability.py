@@ -66,7 +66,7 @@ Example
 """
 import numpy as np
 import re
-from utils import nt2codon_rep
+from utils import nt2codon_rep, gene_to_num_str
 from preprocess_generative_model_and_data import PreprocessedParametersVDJ, PreprocessedParametersVJ
 
 class GenerationProbability(object):
@@ -414,19 +414,18 @@ class GenerationProbability(object):
         if V_usage_mask_in is None: #Default case, use all productive V genes with non-zero probability
             #V_usage_mask = [v for v, V in enumerate(ppp['cutV_genomic_CDR3_segs']) if len(V) > 0]
             V_usage_mask = self.d_V_usage_mask
-        elif isinstance(V_usage_mask_in, list):
+        elif isinstance(V_usage_mask_in, str):
+            V_usage_mask_in = [V_usage_mask_in]
+        
+        if isinstance(V_usage_mask_in, list):
             e_V_usage_mask = set()
             for v in V_usage_mask_in:
                 try:
-                    e_V_usage_mask = e_V_usage_mask.union(self.V_mask_mapping[v])
-                except KeyError:
-                    try:
-                        c_num_gene = '-'.join([str(int(y)) for y in v.lower().split('v')[-1].split('-')])
-                        e_V_usage_mask = e_V_usage_mask.union(self.V_mask_mapping[c_num_gene])
-                    except:
-                        if print_warnings:
-                            print 'Unfamiliar V gene/allele: ' + v
-                        pass
+                    e_V_usage_mask = e_V_usage_mask.union(self.V_mask_mapping[gene_to_num_str(v, 'V')])
+                except:
+                    if print_warnings:
+                        print 'Unfamiliar V gene/allele: ' + v
+                    pass
             if len(e_V_usage_mask) == 0:
                 if print_warnings:
                     print 'No recognized V genes/alleles. Using default V_usage_mask'
@@ -434,36 +433,27 @@ class GenerationProbability(object):
             else:
                 V_usage_mask = list(e_V_usage_mask)
         else:
-            try:
-                V_usage_mask = self.V_mask_mapping[V_usage_mask_in]
-            except KeyError:
-                try:
-                    c_num_gene = '-'.join([str(int(y)) for y in V_usage_mask_in.lower().split('v')[-1].split('-')])
-                    V_usage_mask = self.V_mask_mapping[c_num_gene]
-                except:
-                    #Do raise error here as the mask will be empty
-                    if print_warnings:
-                        print 'Unfamiliar V usage mask: ' + str(V_usage_mask_in) + ', please check the allowed V alleles. Using default V_usage_mask'
-                    V_usage_mask = self.d_V_usage_mask
+            if print_warnings:
+                print 'Unfamiliar typed V usage mask: ' + str(V_usage_mask_in) + '. Using default V_usage_mask'
+            V_usage_mask = self.d_V_usage_mask
                 
                 
         #Format the J usage mask
         if J_usage_mask_in is None: #Default case, use all productive J genes with non-zero probability
             #J_usage_mask = [j for j, J in enumerate(ppp['cutJ_genomic_CDR3_segs']) if len(J) > 0]
             J_usage_mask = self.d_J_usage_mask
-        elif isinstance(J_usage_mask_in, list):
+        elif isinstance(J_usage_mask_in, str):
+            J_usage_mask_in = [J_usage_mask_in]
+        
+        if isinstance(J_usage_mask_in, list):
             e_J_usage_mask = set()
             for j in J_usage_mask_in:
                 try:
-                    e_J_usage_mask = e_J_usage_mask.union(self.J_mask_mapping[j])
-                except KeyError:
-                    try:
-                        c_num_gene = '-'.join([str(int(y)) for y in j.lower().split('j')[-1].split('-')])
-                        e_J_usage_mask = e_J_usage_mask.union(self.J_mask_mapping[c_num_gene])
-                    except:
-                        if print_warnings:
-                            print 'Unfamiliar J gene/allele: ' + j
-                        pass
+                    e_J_usage_mask = e_J_usage_mask.union(self.J_mask_mapping[gene_to_num_str(j, 'J')])
+                except:
+                    if print_warnings:
+                        print 'Unfamiliar J gene/allele: ' + j
+                    pass
             if len(e_J_usage_mask) == 0:
                 if print_warnings:
                     print 'No recognized J genes/alleles. Using default J_usage_mask'
@@ -471,17 +461,9 @@ class GenerationProbability(object):
             else:
                 J_usage_mask = list(e_J_usage_mask)
         else:
-            try:
-                J_usage_mask = self.J_mask_mapping[J_usage_mask_in]
-            except KeyError:
-                try:
-                    c_num_gene = '-'.join([str(int(y)) for y in J_usage_mask_in.lower().split('j')[-1].split('-')])
-                    J_usage_mask = self.J_mask_mapping[c_num_gene]
-                except:
-                    #Do raise error here as the mask will be empty
-                    if print_warnings:
-                        print 'Unfamiliar J usage mask: ' + str(J_usage_mask_in) + ', please check the allowed J alleles. Using default J_usage_mask'
-                    J_usage_mask = self.d_J_usage_mask
+            if print_warnings:
+                print 'Unfamiliar typed J usage mask: ' + str(J_usage_mask_in) + '. Using default J_usage_mask'
+            J_usage_mask = self.d_J_usage_mask
                 
         return V_usage_mask, J_usage_mask
     

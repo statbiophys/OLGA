@@ -40,7 +40,7 @@ GenerationProbabilityV(D)J.
 """
 
 import numpy as np
-from utils import construct_codons_dict, generate_sub_codons_left, generate_sub_codons_right, calc_steady_state_dist
+from utils import construct_codons_dict, generate_sub_codons_left, generate_sub_codons_right, calc_steady_state_dist, gene_to_num_str
 
 class PreprocessedParameters(object):
     """Class used to preprocess the parameters that both VDJ and VJ models have.
@@ -167,27 +167,42 @@ class PreprocessedParameters(object):
         """
         #construct mapping between allele/gene names and index for custom V_usage_masks
         V_allele_names = [V[0] for V in genV]
+        V_reduced_allele_names = [gene_to_num_str(v, 'v') for v in V_allele_names]
         V_mask_mapping = {}
-        for v in set([x.split('*')[0] for x in V_allele_names]):
+        for v in [x.split('*')[0] for x in V_reduced_allele_names]:
             V_mask_mapping[v] = []
-        for v in set(['V'.join((x.split('*')[0]).split('V')[1:]) for x in V_allele_names]):
-            V_mask_mapping[v] = []
-        for i, v in enumerate(V_allele_names):
+            if '-' not in v:
+                V_mask_mapping[v+'-1'] = []
+            else:
+                V_mask_mapping[v.split('-')[0]] = []
+        for i, v in enumerate(V_reduced_allele_names):
             V_mask_mapping[v] = [i]
-            V_mask_mapping['V'.join((v.split('*')[0]).split('V')[1:])].append(i)
-            V_mask_mapping[v.split('*')[0]].append(i)      
+            V_mask_mapping[v.split('*')[0]].append(i)
+            if '-' not in v:
+                V_mask_mapping[v.replace('*', '-1*')] = [i]
+                V_mask_mapping[v.split('*')[0] + '-1'].append(i)
+            else:
+                V_mask_mapping[v.split('*')[0].split('-')[0]].append(i)
+    
         
         #construct mapping between allele/gene names and index for custom J_usage_masks
         J_allele_names = [J[0] for J in genJ]
+        J_reduced_allele_names = [gene_to_num_str(j, 'j') for j in J_allele_names]
         J_mask_mapping = {}
-        for j in set([x.split('*')[0] for x in J_allele_names]):
+        for j in [x.split('*')[0] for x in J_reduced_allele_names]:
             J_mask_mapping[j] = []
-        for j in set(['J'.join((x.split('*')[0]).split('J')[1:]) for x in J_allele_names]):
-            J_mask_mapping[j] = []
-        for i, j in enumerate(J_allele_names):
+            if '-' not in j:
+                J_mask_mapping[j+'-1'] = []
+            else:
+                J_mask_mapping[j.split('-')[0]] = []
+        for i, j in enumerate(J_reduced_allele_names):
             J_mask_mapping[j] = [i]
-            J_mask_mapping['J'.join((j.split('*')[0]).split('J')[1:])].append(i)
             J_mask_mapping[j.split('*')[0]].append(i)
+            if '-' not in j:
+                J_mask_mapping[j.replace('*', '-1*')] = [i]
+                J_mask_mapping[j.split('*')[0] + '-1'].append(i)
+            else:
+                J_mask_mapping[j.split('*')[0].split('-')[0]].append(i)
             
         self.V_allele_names = V_allele_names
         self.V_mask_mapping = V_mask_mapping
