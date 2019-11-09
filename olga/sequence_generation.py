@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """Module for Monte Carlo generation of sequences from a V(D)J recomb model.
 
@@ -58,6 +58,7 @@ Example
 
 @author: zacharysethna
 """
+from __future__ import division
 import numpy as np
 from utils import nt2aa, calc_steady_state_dist
 
@@ -133,27 +134,27 @@ class SequenceGenerationVDJ(object):
 
         """
 
-        self.CPV = (generative_model.PV/float(np.sum(generative_model.PV))).cumsum()
-        self.CPDJ = (generative_model.PDJ/float(np.sum(generative_model.PDJ))).flatten().cumsum()
-        self.CinsVD = (generative_model.PinsVD/float(np.sum(generative_model.PinsVD))).cumsum()
-        self.CinsDJ = (generative_model.PinsDJ/float(np.sum(generative_model.PinsDJ))).cumsum()
+        self.CPV = (generative_model.PV/np.sum(generative_model.PV)).cumsum()
+        self.CPDJ = (generative_model.PDJ/np.sum(generative_model.PDJ)).flatten().cumsum()
+        self.CinsVD = (generative_model.PinsVD/np.sum(generative_model.PinsVD)).cumsum()
+        self.CinsDJ = (generative_model.PinsDJ/np.sum(generative_model.PinsDJ)).cumsum()
 
 
         for V in range(generative_model.PdelV_given_V.shape[1]):
             if np.sum(generative_model.PdelV_given_V[:, V])> 0:
-                generative_model.PdelV_given_V[:, V] = generative_model.PdelV_given_V[:, V]/float(np.sum(generative_model.PdelV_given_V[:, V]))
+                generative_model.PdelV_given_V[:, V] = generative_model.PdelV_given_V[:, V]/np.sum(generative_model.PdelV_given_V[:, V])
 
         self.given_V_CPdelV = generative_model.PdelV_given_V.T.cumsum(axis = 1)
 
         for J in range(generative_model.PdelJ_given_J.shape[1]):
             if np.sum(generative_model.PdelJ_given_J[:, J])> 0:
-                generative_model.PdelJ_given_J[:, J] = generative_model.PdelJ_given_J[:, J]/float(np.sum(generative_model.PdelJ_given_J[:, J]))
+                generative_model.PdelJ_given_J[:, J] = generative_model.PdelJ_given_J[:, J]/np.sum(generative_model.PdelJ_given_J[:, J])
 
         self.given_J_CPdelJ = generative_model.PdelJ_given_J.T.cumsum(axis = 1)
 
         for D in range(generative_model.PdelDldelDr_given_D.shape[2]):
             if np.sum(generative_model.PdelDldelDr_given_D[:,  :, D]) > 0:
-                generative_model.PdelDldelDr_given_D[:, :, D] = generative_model.PdelDldelDr_given_D[:, :, D]/float(np.sum(generative_model.PdelDldelDr_given_D[:, :, D]))
+                generative_model.PdelDldelDr_given_D[:, :, D] = generative_model.PdelDldelDr_given_D[:, :, D]/np.sum(generative_model.PdelDldelDr_given_D[:, :, D])
 
         self.given_D_CPdelDldelDr = np.array([ generative_model.PdelDldelDr_given_D[:, :, i].flatten().cumsum() for i in range(generative_model.PdelDldelDr_given_D.shape[2])])
 
@@ -263,7 +264,7 @@ class SequenceGenerationVDJ(object):
 
         #For 2D arrays make sure to take advantage of a mod expansion to find indicies
         DJ_choice = self.CPDJ.searchsorted(np.random.random())
-        recomb_events['D'] = DJ_choice/self.num_J_genes
+        recomb_events['D'] = DJ_choice//self.num_J_genes
         recomb_events['J'] = DJ_choice % self.num_J_genes
 
 
@@ -274,7 +275,7 @@ class SequenceGenerationVDJ(object):
 
         delDldelDr_choice = self.given_D_CPdelDldelDr[recomb_events['D'], :].searchsorted(np.random.random())
 
-        recomb_events['delDl'] = delDldelDr_choice/self.num_delDr_poss
+        recomb_events['delDl'] = delDldelDr_choice//self.num_delDr_poss
         recomb_events['delDr'] = delDldelDr_choice % self.num_delDr_poss
 
         recomb_events['insVD'] = self.CinsVD.searchsorted(np.random.random())
@@ -335,18 +336,18 @@ class SequenceGenerationVJ(object):
 
         """
 
-        self.CPVJ = (generative_model.PVJ/float(np.sum(generative_model.PVJ))).flatten().cumsum()
-        self.CPinsVJ = (generative_model.PinsVJ/float(np.sum(generative_model.PinsVJ))).cumsum()
+        self.CPVJ = (generative_model.PVJ/np.sum(generative_model.PVJ)).flatten().cumsum()
+        self.CPinsVJ = (generative_model.PinsVJ/np.sum(generative_model.PinsVJ)).cumsum()
 
         for V in range(generative_model.PdelV_given_V.shape[1]):
             if np.sum(generative_model.PdelV_given_V[:, V])> 0:
-                generative_model.PdelV_given_V[:, V] = generative_model.PdelV_given_V[:, V]/float(np.sum(generative_model.PdelV_given_V[:, V]))
+                generative_model.PdelV_given_V[:, V] = generative_model.PdelV_given_V[:, V]/np.sum(generative_model.PdelV_given_V[:, V])
 
         self.given_V_CPdelV = generative_model.PdelV_given_V.T.cumsum(axis = 1)
 
         for J in range(generative_model.PdelJ_given_J.shape[1]):
             if np.sum(generative_model.PdelJ_given_J[:, J])> 0:
-                generative_model.PdelJ_given_J[:, J] = generative_model.PdelJ_given_J[:, J]/float(np.sum(generative_model.PdelJ_given_J[:, J]))
+                generative_model.PdelJ_given_J[:, J] = generative_model.PdelJ_given_J[:, J]/np.sum(generative_model.PdelJ_given_J[:, J])
 
         self.given_J_CPdelJ = generative_model.PdelJ_given_J.T.cumsum(axis = 1)
 
@@ -441,7 +442,7 @@ class SequenceGenerationVJ(object):
 
         #For 2D arrays make sure to take advantage of a mod expansion to find indicies
         VJ_choice = self.CPVJ.searchsorted(np.random.random())
-        recomb_events['V'] = VJ_choice/self.num_J_genes
+        recomb_events['V'] = VJ_choice//self.num_J_genes
         recomb_events['J'] = VJ_choice % self.num_J_genes
 
 

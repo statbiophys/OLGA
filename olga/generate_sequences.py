@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """Command line script to generate sequences.
 
@@ -130,16 +130,22 @@ string is 'FVW'.
 
 #Function assumes that it is in the same directory that the folder app/ is
 #in (which should contain all the modules imported).
-
+from __future__ import print_function, division
 import os
-import sys
-
-
-import olga.load_model as load_model
-import olga.sequence_generation as sequence_generation
+#import olga.load_model as load_model
+#import olga.sequence_generation as sequence_generation
+import load_model as load_model
+import sequence_generation as sequence_generation
 from optparse import OptionParser
 import time
 import numpy as np
+
+#Set input = raw_input for python 2
+try:
+    import __builtin__
+    input = getattr(__builtin__, 'raw_input')
+except (ImportError, AttributeError):
+    pass
 
 def main():
     """ Generate sequences."""
@@ -175,7 +181,7 @@ def main():
     default_models['mouseTRB'] = [os.path.join(main_folder, 'default_models', 'mouse_T_beta'), 'VDJ']
     default_models['humanIGH'] = [os.path.join(main_folder, 'default_models', 'human_B_heavy'), 'VDJ']
 
-    num_models_specified = sum([1 for x in default_models.keys() + ['vj_model_folder', 'vdj_model_folder'] if getattr(options, x)])
+    num_models_specified = sum([1 for x in list(default_models.keys()) + ['vj_model_folder', 'vdj_model_folder'] if getattr(options, x)])
 
     if num_models_specified == 1: #exactly one model specified
         try:
@@ -190,18 +196,18 @@ def main():
                 model_folder = options.vj_model_folder
                 recomb_type = 'VJ'
     elif num_models_specified == 0:
-        print 'Need to indicate generative model.'
-        print 'Exiting...'
+        print('Need to indicate generative model.')
+        print('Exiting...')
         return -1
     elif num_models_specified > 1:
-        print 'Only specify one model'
-        print 'Exiting...'
+        print('Only specify one model')
+        print('Exiting...')
         return -1
 
     #Check that all model and genomic files exist in the indicated model folder
     if not os.path.isdir(model_folder):
-        print 'Check pathing... cannot find the model folder: ' + model_folder
-        print 'Exiting...'
+        print('Check pathing... cannot find the model folder: ' + model_folder)
+        print('Exiting...')
         return -1
 
     params_file_name = os.path.join(model_folder,'model_params.txt')
@@ -211,17 +217,17 @@ def main():
 
     for x in [params_file_name, marginals_file_name, V_anchor_pos_file, J_anchor_pos_file]:
         if not os.path.isfile(x):
-            print 'Cannot find: ' + x
-            print 'Please check the files (and naming conventions) in the model folder ' + model_folder
-            print 'Exiting...'
+            print('Cannot find: ' + x)
+            print('Please check the files (and naming conventions) in the model folder ' + model_folder)
+            print('Exiting...')
             return -1
 
 
     if options.outfile_name is not None:
         outfile_name = options.outfile_name
         if os.path.isfile(outfile_name):
-            if not raw_input(outfile_name + ' already exists. Overwrite (y/n)? ').strip().lower() in ['y', 'yes']:
-                print 'Exiting...'
+            if not input(outfile_name + ' already exists. Overwrite (y/n)? ').strip().lower() in ['y', 'yes']:
+                print('Exiting...')
                 return -1
 
     #Parse arguments
@@ -229,8 +235,8 @@ def main():
     num_seqs_to_generate = int(options.num_seqs_to_generate)
 
     if num_seqs_to_generate <= 0:
-        print 'Need to specify num_seqs (number of sequences to generate).'
-        print 'Exiting...'
+        print('Need to specify num_seqs (number of sequences to generate).')
+        print('Exiting...')
         return -1
 
     #Parse default delimiter
@@ -280,7 +286,7 @@ def main():
     if options.outfile_name is not None:
         outfile = open(outfile_name, 'w')
 
-        print 'Starting sequence generation... '
+        print('Starting sequence generation... ')
         start_time = time.time()
         for i in range(num_seqs_to_generate):
             ntseq, aaseq, V_in, J_in = seq_gen.gen_rnd_prod_CDR3(conserved_J_residues)
@@ -297,37 +303,37 @@ def main():
 
             if (i+1)%seqs_per_time_update == 0 and time_updates:
                 c_time = time.time() - start_time
-                eta = ((num_seqs_to_generate - (i+1))/float(i+1))*c_time
+                eta = ((num_seqs_to_generate - (i+1))/(i+1))*c_time
                 if c_time > 86400: #more than a day
-                    c_time_str = '%d days, %d hours, %d minutes, and %.2f seconds.'%(int(c_time)/86400, (int(c_time)/3600)%24, (int(c_time)/60)%60, c_time%60)
+                    c_time_str = '%d days, %d hours, %d minutes, and %.2f seconds.'%(int(c_time)//86400, (int(c_time)//3600)%24, (int(c_time)//60)%60, c_time%60)
                 elif c_time > 3600: #more than an hr
-                    c_time_str = '%d hours, %d minutes, and %.2f seconds.'%((int(c_time)/3600)%24, (int(c_time)/60)%60, c_time%60)
+                    c_time_str = '%d hours, %d minutes, and %.2f seconds.'%((int(c_time)//3600)%24, (int(c_time)//60)%60, c_time%60)
                 elif c_time > 60: #more than a min
-                    c_time_str = '%d minutes and %.2f seconds.'%((int(c_time)/60)%60, c_time%60)
+                    c_time_str = '%d minutes and %.2f seconds.'%((int(c_time)//60)%60, c_time%60)
                 else:
                     c_time_str = '%.2f seconds.'%(c_time)
 
                 if eta > 86400: #more than a day
-                    eta_str = '%d days, %d hours, %d minutes, and %.2f seconds.'%(int(eta)/86400, (int(eta)/3600)%24, (int(eta)/60)%60, eta%60)
+                    eta_str = '%d days, %d hours, %d minutes, and %.2f seconds.'%(int(eta)//86400, (int(eta)//3600)%24, (int(eta)//60)%60, eta%60)
                 elif eta > 3600: #more than an hr
-                    eta_str = '%d hours, %d minutes, and %.2f seconds.'%((int(eta)/3600)%24, (int(eta)/60)%60, eta%60)
+                    eta_str = '%d hours, %d minutes, and %.2f seconds.'%((int(eta)//3600)%24, (int(eta)//60)%60, eta%60)
                 elif eta > 60: #more than a min
-                    eta_str = '%d minutes and %.2f seconds.'%((int(eta)/60)%60, eta%60)
+                    eta_str = '%d minutes and %.2f seconds.'%((int(eta)//60)%60, eta%60)
                 else:
                     eta_str = '%.2f seconds.'%(eta)
 
-                print '%d sequences generated in %s Estimated time remaining: %s'%(i+1, c_time_str, eta_str)
+                print('%d sequences generated in %s Estimated time remaining: %s'%(i+1, c_time_str, eta_str))
 
         c_time = time.time() - start_time
         if c_time > 86400: #more than a day
-            c_time_str = '%d days, %d hours, %d minutes, and %.2f seconds.'%(int(c_time)/86400, (int(c_time)/3600)%24, (int(c_time)/60)%60, c_time%60)
+            c_time_str = '%d days, %d hours, %d minutes, and %.2f seconds.'%(int(c_time)//86400, (int(c_time)//3600)%24, (int(c_time)//60)%60, c_time%60)
         elif c_time > 3600: #more than an hr
-            c_time_str = '%d hours, %d minutes, and %.2f seconds.'%((int(c_time)/3600)%24, (int(c_time)/60)%60, c_time%60)
+            c_time_str = '%d hours, %d minutes, and %.2f seconds.'%((int(c_time)//3600)%24, (int(c_time)//60)%60, c_time%60)
         elif c_time > 60: #more than a min
-            c_time_str = '%d minutes and %.2f seconds.'%((int(c_time)/60)%60, c_time%60)
+            c_time_str = '%d minutes and %.2f seconds.'%((int(c_time)//60)%60, c_time%60)
         else:
             c_time_str = '%.2f seconds.'%(c_time)
-        print 'Completed generating all %d sequences in %s'%(num_seqs_to_generate, c_time_str)
+        print('Completed generating all %d sequences in %s'%(num_seqs_to_generate, c_time_str))
         outfile.close()
 
     else: #print to stdout
@@ -342,6 +348,6 @@ def main():
 
             if record_genes:
                 current_line_out += delimiter + V_gene_names[V_in] + delimiter + J_gene_names[J_in]
-            print current_line_out
+            print(current_line_out)
 
 if __name__ == '__main__': main()

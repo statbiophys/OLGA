@@ -1,6 +1,6 @@
 ## Synopsis
 
-OLGA (Optimized Likelihood estimate of immunoGlobulin Amino-acid sequences) is a python 2.7 software developed to compute the generation probability of amino acid and in-frame nucleotide CDR3 sequences from a generative model of V(D)J recombination.
+OLGA (Optimized Likelihood estimate of immunoGlobulin Amino-acid sequences) is a python 2.7/3.6 software developed to compute the generation probability of amino acid and in-frame nucleotide CDR3 sequences from a generative model of V(D)J recombination.
 
 ## Motivation
 
@@ -13,7 +13,7 @@ As adaptive repertoire researchers span the full gamut of technical coding skill
 Documentation and examples provided below. Ideally, even the interested party who is uncomfortable with coding should be able to manage from the examples.
 
 ## Version
-Latest released version: 1.0.4
+Latest released version: 1.1.0
 
 ## Installation
 OLGA is a python 2.7 software which only uses standard python libraries and requires no additional dependencies. It is available on PyPI and can be downloaded and installed through pip: ```pip install olga```.

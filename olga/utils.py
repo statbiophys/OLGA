@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """Module for utility functions.
 
@@ -23,7 +23,7 @@ docstring of construct_codons_dict.
 
 @author: zacharysethna
 """
-
+from __future__ import print_function, division
 import numpy as np
 
     
@@ -234,14 +234,14 @@ def construct_codons_dict(alphabet_file = None):
     for symbol in expanded_alphabet.keys():
         #Double check that the symbol isn't already used (important particularly for the single codon representation)
         if symbol in codons_dict.keys():
-            print symbol + " is already used as an 'amino acid' symbol for codons: "
-            print codons_dict[symbol]
+            print(symbol + " is already used as an 'amino acid' symbol for codons: ")
+            print(codons_dict[symbol])
             continue
         elif not len(symbol) == 1: #Check that the custom symbol is a single character
-            print "Can't use " + symbol + " as a custom 'amino acid' definitions as such symbols must be single characters."
+            print("Can't use " + symbol + " as a custom 'amino acid' definitions as such symbols must be single characters.")
             continue
         elif symbol in protected_symbols: #This elif shouldn't trigger due to the stripping of protected symbols.
-            print symbol + " is a protected character"
+            print(symbol + " is a protected character")
         current_codon_collection = set()
         for x in expanded_alphabet[symbol]:
             if x in codons_dict.keys(): #Check if reference to an amino acid or other amino acid symbol
@@ -251,7 +251,7 @@ def construct_codons_dict(alphabet_file = None):
             elif len(x) == 0: #fully stripped away
                 continue
             else: #If not, don't recognize the addition and continue.
-                print 'Unfamiliar amino acid symbol or codon: ' + x
+                print('Unfamiliar amino acid symbol or codon: ' + x)
                 continue
         codons_dict[symbol] = list(current_codon_collection)
     
@@ -332,7 +332,7 @@ def determine_seq_type(seq, aa_alphabet):
         return 'ntseq'
     elif all([x in aa_alphabet for x in seq]):
         return 'aaseq'
-    elif all([x in aa_alphabet + '[]{}0123456789,']):
+    elif all([x in aa_alphabet + '[]{}0123456789,' for x in seq]):
         return 'regex'
     
 #%%

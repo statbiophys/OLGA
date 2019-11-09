@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """Definition of classes GenerationProbabilityV(D)J to compute Pgen of a CDR3 seq.
 
@@ -64,10 +64,18 @@ Example
 @author: zacharysethna
 
 """
+from __future__ import print_function, division
 import numpy as np
 import re
 from utils import nt2codon_rep, gene_to_num_str
 from preprocess_generative_model_and_data import PreprocessedParametersVDJ, PreprocessedParametersVJ
+
+#Set input = raw_input for python 2
+try:
+    import __builtin__
+    input = getattr(__builtin__, 'raw_input')
+except (ImportError, AttributeError):
+    pass
 
 class GenerationProbability(object):
     """Class used to define Pgen functions and sequence formatting.
@@ -256,7 +264,7 @@ class GenerationProbability(object):
             if aa not in self.codons_dict.keys():
                 #Check to make sure all symbols are accounted for
                 if print_warnings:
-                    print 'Invalid amino acid CDR3 sequence --- unfamiliar symbol: ' + aa
+                    print('Invalid amino acid CDR3 sequence --- unfamiliar symbol: ' + aa)
                 return 0    
         
         V_usage_mask, J_usage_mask = self.format_usage_masks(V_usage_mask_in, J_usage_mask_in, print_warnings)
@@ -307,7 +315,7 @@ class GenerationProbability(object):
             if aa not in 'ACDEFGHIKLMNPQRSTVWY':
                 #Check to make sure all symbols are accounted for
                 if print_warnings:
-                    print 'Invalid amino acid CDR3 sequence --- unfamiliar symbol: ' + aa
+                    print('Invalid amino acid CDR3 sequence --- unfamiliar symbol: ' + aa)
                 return 0
         tot_pgen = 0
         for i in range(len(CDR3_seq)):
@@ -352,7 +360,7 @@ class GenerationProbability(object):
         if not len(CDR3_ntseq)%3 == 0:
             #Make sure sequence is inframe
             if print_warnings:
-                print 'Invalid nucleotide CDR3 sequence --- out of frame sequence'
+                print('Invalid nucleotide CDR3 sequence --- out of frame sequence')
             return 0
         elif len(CDR3_ntseq) == 0:
             return 0
@@ -360,7 +368,7 @@ class GenerationProbability(object):
             for nt in CDR3_ntseq:
                 if nt not in 'ACGTacgt':
                     if print_warnings:
-                        print 'Invalid nucleotide CDR3 sequence --- unfamiliar nucleotide: ' + nt
+                        print('Invalid nucleotide CDR3 sequence --- unfamiliar nucleotide: ' + nt)
                     return 0
         
         V_usage_mask, J_usage_mask = self.format_usage_masks(V_usage_mask_in, J_usage_mask_in, print_warnings)
@@ -411,58 +419,58 @@ class GenerationProbability(object):
             
         """
         #Format the V usage mask
+        if isinstance(V_usage_mask_in, str):
+            V_usage_mask_in = [V_usage_mask_in]
+        
         if V_usage_mask_in is None: #Default case, use all productive V genes with non-zero probability
             #V_usage_mask = [v for v, V in enumerate(ppp['cutV_genomic_CDR3_segs']) if len(V) > 0]
             V_usage_mask = self.d_V_usage_mask
-        elif isinstance(V_usage_mask_in, str):
-            V_usage_mask_in = [V_usage_mask_in]
-        
-        if isinstance(V_usage_mask_in, list):
+        elif isinstance(V_usage_mask_in, list):
             e_V_usage_mask = set()
             for v in V_usage_mask_in:
                 try:
                     e_V_usage_mask = e_V_usage_mask.union(self.V_mask_mapping[gene_to_num_str(v, 'V')])
                 except:
                     if print_warnings:
-                        print 'Unfamiliar V gene/allele: ' + v
+                        print('Unfamiliar V gene/allele: ' + v)
                     pass
             if len(e_V_usage_mask) == 0:
                 if print_warnings:
-                    print 'No recognized V genes/alleles. Using default V_usage_mask'
+                    print('No recognized V genes/alleles. Using default V_usage_mask')
                 V_usage_mask = self.d_V_usage_mask
             else:
                 V_usage_mask = list(e_V_usage_mask)
         else:
             if print_warnings:
-                print 'Unfamiliar typed V usage mask: ' + str(V_usage_mask_in) + '. Using default V_usage_mask'
+                print('Unfamiliar typed V usage mask: ' + str(V_usage_mask_in) + '. Using default V_usage_mask')
             V_usage_mask = self.d_V_usage_mask
                 
                 
         #Format the J usage mask
+        if isinstance(J_usage_mask_in, str):
+            J_usage_mask_in = [J_usage_mask_in]
+            
         if J_usage_mask_in is None: #Default case, use all productive J genes with non-zero probability
             #J_usage_mask = [j for j, J in enumerate(ppp['cutJ_genomic_CDR3_segs']) if len(J) > 0]
             J_usage_mask = self.d_J_usage_mask
-        elif isinstance(J_usage_mask_in, str):
-            J_usage_mask_in = [J_usage_mask_in]
-        
-        if isinstance(J_usage_mask_in, list):
+        elif isinstance(J_usage_mask_in, list):
             e_J_usage_mask = set()
             for j in J_usage_mask_in:
                 try:
                     e_J_usage_mask = e_J_usage_mask.union(self.J_mask_mapping[gene_to_num_str(j, 'J')])
                 except:
                     if print_warnings:
-                        print 'Unfamiliar J gene/allele: ' + j
+                        print('Unfamiliar J gene/allele: ' + j)
                     pass
             if len(e_J_usage_mask) == 0:
                 if print_warnings:
-                    print 'No recognized J genes/alleles. Using default J_usage_mask'
+                    print('No recognized J genes/alleles. Using default J_usage_mask')
                 J_usage_mask = self.d_J_usage_mask
             else:
                 J_usage_mask = list(e_J_usage_mask)
         else:
             if print_warnings:
-                print 'Unfamiliar typed J usage mask: ' + str(J_usage_mask_in) + '. Using default J_usage_mask'
+                print('Unfamiliar typed J usage mask: ' + str(J_usage_mask_in) + '. Using default J_usage_mask')
             J_usage_mask = self.d_J_usage_mask
                 
         return V_usage_mask, J_usage_mask
@@ -520,11 +528,11 @@ class GenerationProbability(object):
         for aa in ''.join(split_seq):
             if aa not in aa_symbols:
                 if print_warnings:
-                    print 'Unfamiliar symbol representing a codon:' + aa + ' --- check codon dictionary or the regex syntax'
+                    print('Unfamiliar symbol representing a codon:' + aa + ' --- check codon dictionary or the regex syntax')
                 return []
         
         
-        regex_list = [split_seq[i/2] if i%2 == 0 else bracket_ex[i/2] for i in range(len(bracket_ex) + len(split_seq)) if not (i%2 == 0 and len(split_seq[i/2]) ==  0)]
+        regex_list = [split_seq[i//2] if i%2 == 0 else bracket_ex[i//2] for i in range(len(bracket_ex) + len(split_seq)) if not (i%2 == 0 and len(split_seq[i//2]) ==  0)]
         
         max_num_seqs = 1
         for l, ex in enumerate(regex_list[::-1]):
@@ -534,17 +542,17 @@ class GenerationProbability(object):
                 for aa in ex.strip('[]'):
                     if aa not in aa_symbols:
                         if print_warnings:
-                            print 'Unfamiliar symbol representing a codon:' + aa + ' --- check codon dictionary'
+                            print('Unfamiliar symbol representing a codon:' + aa + ' --- check codon dictionary')
                         return []
                 max_num_seqs *= len(ex) - 2
             elif ex[0] == '{': #curly bracket
                 if i == 0:
                     if print_warnings:
-                        print "Can't have {} expression at start of sequence"
+                        print("Can't have {} expression at start of sequence")
                     return []
                 elif isinstance(regex_list[i-1], list):
                     if print_warnings:
-                        print "Two {} expressions in a row is not supported"
+                        print("Two {} expressions in a row is not supported")
                     return []
                 elif regex_list[i-1][0] == '[':
                     syms = regex_list[i-1].strip('[]')
@@ -562,7 +570,7 @@ class GenerationProbability(object):
                         new_expression = [int(ex.strip('{}').split(',')[0]), default_max_reps, syms]
                     if new_expression[0] > new_expression[1]:
                         if print_warnings:
-                            print 'Check regex syntax --- should be {min,max}'
+                            print('Check regex syntax --- should be {min,max}')
                         return []
                     max_num_seqs *= sum([len(syms)**n for n in range(new_expression[0], new_expression[1]+1)])/len(syms)
                 #print new_expression
@@ -570,9 +578,9 @@ class GenerationProbability(object):
                 
         if max_num_seqs > 10000 and raise_overload_warning:
             if print_warnings:
-                answer = raw_input('Warning large number of sequences (estimated ' + str(max_num_seqs) + ' seqs) match the regular expression. Possible memory and time issues. Continue? (y/n)')
+                answer = input('Warning large number of sequences (estimated ' + str(max_num_seqs) + ' seqs) match the regular expression. Possible memory and time issues. Continue? (y/n)')
                 if not answer == 'y':
-                    print 'Canceling...'
+                    print('Canceling...')
                     return []
             else:
                 return []
@@ -632,9 +640,9 @@ class GenerationProbability(object):
             return 0
         aa_aligned = True
         while aa_aligned:
-            if ntseq[max_alignment:max_alignment+3] in self.codons_dict[CDR3_seq[max_alignment/3]]:
+            if ntseq[max_alignment:max_alignment+3] in self.codons_dict[CDR3_seq[max_alignment//3]]:
                 max_alignment += 3
-                if max_alignment/3 == len(CDR3_seq):
+                if max_alignment//3 == len(CDR3_seq):
                     return max_alignment
             else:
                 break
@@ -643,7 +651,7 @@ class GenerationProbability(object):
         codon_frag = ''
         for nt in last_codon:
             codon_frag += nt
-            if codon_frag in self.sub_codons_left[CDR3_seq[max_alignment/3]]:
+            if codon_frag in self.sub_codons_left[CDR3_seq[max_alignment//3]]:
                 max_alignment += 1
             else:
                 break
@@ -683,9 +691,9 @@ class GenerationProbability(object):
             return 0
         aa_aligned = True
         while aa_aligned:
-            if r_ntseq[max_alignment:max_alignment+3][::-1] in self.codons_dict[r_CDR3_seq[max_alignment/3]]:
+            if r_ntseq[max_alignment:max_alignment+3][::-1] in self.codons_dict[r_CDR3_seq[max_alignment//3]]:
                 max_alignment += 3
-                if max_alignment/3 == len(CDR3_seq):
+                if max_alignment//3 == len(CDR3_seq):
                     return max_alignment
             else:
                 break
@@ -694,7 +702,7 @@ class GenerationProbability(object):
         codon_frag = ''
         for nt in r_last_codon:
             codon_frag = nt + codon_frag
-            if codon_frag in self.sub_codons_right[r_CDR3_seq[max_alignment/3]]:
+            if codon_frag in self.sub_codons_right[r_CDR3_seq[max_alignment//3]]:
                 max_alignment += 1
             else:
                 break
@@ -950,7 +958,7 @@ class GenerationProbabilityVDJ(GenerationProbability, PreprocessedParametersVDJ)
             try:
                 cutV_gen_seg = self.cutV_genomic_CDR3_segs[V_in]
             except IndexError:
-                print 'Check provided V usage mask. Contains indicies out of allowed range.'
+                print('Check provided V usage mask. Contains indicies out of allowed range.')
                 continue
             current_alignment_length = self.max_nt_to_aa_alignment_left(CDR3_seq, cutV_gen_seg)
             alignment_lengths += [current_alignment_length]
@@ -960,7 +968,7 @@ class GenerationProbabilityVDJ(GenerationProbability, PreprocessedParametersVDJ)
                 #For first and last nt in a codon use PVdelV_nt_pos_vec
                 current_Pi_V[:, :current_alignment_length] = self.PVdelV_nt_pos_vec[V_in][:, :current_alignment_length]
                 for pos in range(1, current_alignment_length, 3): #for middle nt use PVdelV_2nd_nt_pos_per_aa_vec
-                    current_Pi_V[:, pos] = self.PVdelV_2nd_nt_pos_per_aa_vec[V_in][CDR3_seq[pos/3]][:, pos]
+                    current_Pi_V[:, pos] = self.PVdelV_2nd_nt_pos_per_aa_vec[V_in][CDR3_seq[pos//3]][:, pos]
                 Pi_V[:, :current_alignment_length] += current_Pi_V[:, :current_alignment_length]
         
         return Pi_V, max(alignment_lengths)
@@ -1031,16 +1039,16 @@ class GenerationProbabilityVDJ(GenerationProbability, PreprocessedParametersVDJ)
             Pi_L[:, init_pos] += self.PinsVD[0]*Pi_V[:, init_pos]
             
             #One insertion
-            Pi_L[:, init_pos+1] += self.PinsVD[1]*np.dot(self.lDvd[CDR3_seq[init_pos/3]], Pi_V[:, init_pos])
+            Pi_L[:, init_pos+1] += self.PinsVD[1]*np.dot(self.lDvd[CDR3_seq[init_pos//3]], Pi_V[:, init_pos])
     
             #Two insertions and compute the base nt vec for the standard loop        
-            current_base_nt_vec = np.dot(self.lTvd[CDR3_seq[init_pos/3]], Pi_V[:, init_pos])
+            current_base_nt_vec = np.dot(self.lTvd[CDR3_seq[init_pos//3]], Pi_V[:, init_pos])
             Pi_L[0, init_pos+2] += self.PinsVD[2]*np.sum(current_base_nt_vec)
             
             base_ins = 2
             
             #Loop over all other insertions using base_nt_vec
-            for aa in CDR3_seq[init_pos/3 + 1: init_pos/3 + max_insertions/3]:
+            for aa in CDR3_seq[init_pos//3 + 1: init_pos//3 + max_insertions//3]:
                 Pi_L[:, init_pos+base_ins+1] += self.PinsVD[base_ins + 1]*np.dot(self.Svd[aa], current_base_nt_vec)
                 Pi_L[:, init_pos+base_ins+2] += self.PinsVD[base_ins + 2]*np.dot(self.Dvd[aa], current_base_nt_vec)
                 current_base_nt_vec = np.dot(self.Tvd[aa], current_base_nt_vec)
@@ -1058,7 +1066,7 @@ class GenerationProbabilityVDJ(GenerationProbability, PreprocessedParametersVDJ)
             base_ins = 1
             
             #Loop over all other insertions using base_nt_vec
-            for aa in CDR3_seq[init_pos/3 + 1: init_pos/3 + max_insertions/3]:
+            for aa in CDR3_seq[init_pos//3 + 1: init_pos//3 + max_insertions//3]:
                 Pi_L[:, init_pos+base_ins+1] += self.PinsVD[base_ins + 1]*np.dot(self.Svd[aa], current_base_nt_vec)
                 Pi_L[:, init_pos+base_ins+2] += self.PinsVD[base_ins + 2]*np.dot(self.Dvd[aa], current_base_nt_vec)
                 current_base_nt_vec = np.dot(self.Tvd[aa], current_base_nt_vec)
@@ -1075,7 +1083,7 @@ class GenerationProbabilityVDJ(GenerationProbability, PreprocessedParametersVDJ)
             base_ins = 0
             
             #Loop over all other insertions using base_nt_vec
-            for aa in CDR3_seq[init_pos/3 + 1: init_pos/3 + max_insertions/3]:
+            for aa in CDR3_seq[init_pos//3 + 1: init_pos//3 + max_insertions//3]:
                 Pi_L[:, init_pos+base_ins+1] += self.PinsVD[base_ins + 1]*np.dot(self.Svd[aa], current_base_nt_vec)
                 Pi_L[:, init_pos+base_ins+2] += self.PinsVD[base_ins + 2]*np.dot(self.Dvd[aa], current_base_nt_vec)
                 current_base_nt_vec = np.dot(self.Tvd[aa], current_base_nt_vec)
@@ -1139,7 +1147,7 @@ class GenerationProbabilityVDJ(GenerationProbability, PreprocessedParametersVDJ)
             try:
                 cutJ_gen_seg = self.cutJ_genomic_CDR3_segs[J_in]
             except IndexError:
-                print 'Check provided V usage mask. Contains indicies out of allowed range.'
+                print('Check provided V usage mask. Contains indicies out of allowed range.')
                 continue
             current_alignment_length = self.max_nt_to_aa_alignment_right(CDR3_seq, cutJ_gen_seg)
             alignment_lengths += [current_alignment_length]
@@ -1149,7 +1157,7 @@ class GenerationProbabilityVDJ(GenerationProbability, PreprocessedParametersVDJ)
                 #For first and last nt in a codon use PJdelJ_nt_pos_vec
                 current_Pi_J[:, -current_alignment_length:] = self.PJdelJ_nt_pos_vec[J_in][:, -current_alignment_length:]          
                 for pos in range(-2, -current_alignment_length-1, -3): #for middle nt use PJdelJ_2nd_nt_pos_per_aa_vec
-                    current_Pi_J[:, pos] = self.PJdelJ_2nd_nt_pos_per_aa_vec[J_in][CDR3_seq[pos/3]][:, pos]
+                    current_Pi_J[:, pos] = self.PJdelJ_2nd_nt_pos_per_aa_vec[J_in][CDR3_seq[pos//3]][:, pos]
     
             for D_in, pd_given_j in enumerate(self.PD_given_J[:, J_in]):
                 Pi_J_given_D[D_in][:, -current_alignment_length:] += pd_given_j*current_Pi_J[:, -current_alignment_length:]
@@ -1225,16 +1233,16 @@ class GenerationProbabilityVDJ(GenerationProbability, PreprocessedParametersVDJ)
                 Pi_JinsDJ_given_D[D_in][:, init_pos] += self.PinsDJ[0]*Pi_J_given_D[D_in][:, init_pos]
                 
                 #One insertion
-                Pi_JinsDJ_given_D[D_in][:, init_pos-1] += self.PinsDJ[1]*np.dot(self.rDdj[CDR3_seq[init_pos/3]], Pi_J_given_D[D_in][:, init_pos])
+                Pi_JinsDJ_given_D[D_in][:, init_pos-1] += self.PinsDJ[1]*np.dot(self.rDdj[CDR3_seq[init_pos//3]], Pi_J_given_D[D_in][:, init_pos])
         
                 #Two insertions and compute the base nt vec for the standard loop        
-                current_base_nt_vec = np.dot(self.rTdj[CDR3_seq[init_pos/3]], Pi_J_given_D[D_in][:, init_pos])
+                current_base_nt_vec = np.dot(self.rTdj[CDR3_seq[init_pos//3]], Pi_J_given_D[D_in][:, init_pos])
                 Pi_JinsDJ_given_D[D_in][0, init_pos-2] += self.PinsDJ[2]*np.sum(current_base_nt_vec)
                 
                 base_ins = 2
                 
                 #Loop over all other insertions using base_nt_vec
-                for aa in CDR3_seq[init_pos/3 - 1: init_pos/3 - max_insertions/3:-1]:
+                for aa in CDR3_seq[init_pos//3 - 1: init_pos//3 - max_insertions//3:-1]:
                     Pi_JinsDJ_given_D[D_in][:, init_pos-base_ins-1] += self.PinsDJ[base_ins + 1]*np.dot(self.Sdj[aa], current_base_nt_vec)
                     Pi_JinsDJ_given_D[D_in][:, init_pos-base_ins-2] += self.PinsDJ[base_ins + 2]*np.dot(self.Ddj[aa], current_base_nt_vec)
                     current_base_nt_vec = np.dot(self.Tdj[aa], current_base_nt_vec)
@@ -1252,7 +1260,7 @@ class GenerationProbabilityVDJ(GenerationProbability, PreprocessedParametersVDJ)
                 base_ins = 1
                 
                 #Loop over all other insertions using base_nt_vec
-                for aa in CDR3_seq[init_pos/3 - 1: init_pos/3 - max_insertions/3:-1]:
+                for aa in CDR3_seq[init_pos//3 - 1: init_pos//3 - max_insertions//3:-1]:
                     Pi_JinsDJ_given_D[D_in][:, init_pos-base_ins-1] += self.PinsDJ[base_ins + 1]*np.dot(self.Sdj[aa], current_base_nt_vec)
                     Pi_JinsDJ_given_D[D_in][:, init_pos-base_ins-2] += self.PinsDJ[base_ins + 2]*np.dot(self.Ddj[aa], current_base_nt_vec)
                     current_base_nt_vec = np.dot(self.Tdj[aa], current_base_nt_vec)
@@ -1269,7 +1277,7 @@ class GenerationProbabilityVDJ(GenerationProbability, PreprocessedParametersVDJ)
                 base_ins = 0
                 
                 #Loop over all other insertions using base_nt_vec
-                for aa in CDR3_seq[init_pos/3 - 1: init_pos/3 - max_insertions/3:-1]:
+                for aa in CDR3_seq[init_pos//3 - 1: init_pos//3 - max_insertions//3:-1]:
                     Pi_JinsDJ_given_D[D_in][:, init_pos-base_ins-1] += self.PinsDJ[base_ins + 1]*np.dot(self.Sdj[aa], current_base_nt_vec)
                     Pi_JinsDJ_given_D[D_in][:, init_pos-base_ins-2] += self.PinsDJ[base_ins + 2]*np.dot(self.Ddj[aa], current_base_nt_vec)
                     current_base_nt_vec = np.dot(self.Tdj[aa], current_base_nt_vec)
@@ -1361,7 +1369,7 @@ class GenerationProbabilityVDJ(GenerationProbability, PreprocessedParametersVDJ)
                         codon_prefix_dict[last_nt + second_nt] = np.zeros(4)
                         #for first_nt in ['ACGT'[nt] for nt in range(4) if Pi_JinsDJ_given_D[D_in][nt, init_pos] > 0]:
                         for first_nt in 'ACGT':
-                            if last_nt + second_nt + first_nt in self.codons_dict[CDR3_seq[init_pos/3]]: #possible allowed codon
+                            if last_nt + second_nt + first_nt in self.codons_dict[CDR3_seq[init_pos//3]]: #possible allowed codon
                                 second_pos_dict[second_nt][nt2num[last_nt]] += Pi_JinsDJ_given_D[D_in][nt2num[first_nt], init_pos] #base weight for middle pos nt
                                 codon_prefix_dict[last_nt + second_nt][0] += Pi_JinsDJ_given_D[D_in][nt2num[first_nt], init_pos] #base weight for last pos nt
                 for nt1 in 'ACGT':
@@ -1408,21 +1416,21 @@ class GenerationProbabilityVDJ(GenerationProbability, PreprocessedParametersVDJ)
                         #Position is the first nt in codon
                         if pos%3 == 2:
                             #check alignment
-                            if cutD_gen_seg[D_pos] in self.sub_codons_right[CDR3_seq[pos/3]]:
+                            if cutD_gen_seg[D_pos] in self.sub_codons_right[CDR3_seq[pos//3]]:
                                 Pi_R[:, pos] += current_PdelDldelDr*base_prob*self.PD_nt_pos_vec[D_in][:, D_pos]
                             else:
                                 break #no longer aligned -- exit loop
                         #Position is the second nt in codon
                         elif pos%3 == 1:
                             #check alignment
-                            if cutD_gen_seg[D_pos:D_pos + 2] in self.sub_codons_right[CDR3_seq[pos/3]]:
-                                Pi_R[:, pos] += current_PdelDldelDr*base_prob*self.PD_2nd_nt_pos_per_aa_vec[D_in][CDR3_seq[pos/3]][ :, D_pos]
+                            if cutD_gen_seg[D_pos:D_pos + 2] in self.sub_codons_right[CDR3_seq[pos//3]]:
+                                Pi_R[:, pos] += current_PdelDldelDr*base_prob*self.PD_2nd_nt_pos_per_aa_vec[D_in][CDR3_seq[pos//3]][ :, D_pos]
                             else:
                                 break #no longer aligned --- exit loop
                         #Position is the last nt in codon
                         else:
                             #check alignment
-                            if cutD_gen_seg[D_pos:D_pos + 3] in self.codons_dict[CDR3_seq[pos/3]]:
+                            if cutD_gen_seg[D_pos:D_pos + 3] in self.codons_dict[CDR3_seq[pos//3]]:
                                 Pi_R[0, pos] += current_PdelDldelDr*base_prob
                             else:
                                 break #no longer aligned --- exit loop
@@ -1459,21 +1467,21 @@ class GenerationProbabilityVDJ(GenerationProbability, PreprocessedParametersVDJ)
                         #Position is the first nt in codon
                         if pos%3 == 2:
                             #check alignment
-                            if cutD_gen_seg[D_pos] in self.sub_codons_right[CDR3_seq[pos/3]]:
+                            if cutD_gen_seg[D_pos] in self.sub_codons_right[CDR3_seq[pos//3]]:
                                 Pi_R[:, pos] += current_PdelDldelDr*base_prob*self.PD_nt_pos_vec[D_in][:, D_pos]
                             else:
                                 break #no longer aligned -- exit loop
                         #Position is the second nt in codon
                         elif pos%3 == 1:
                             #check alignment
-                            if cutD_gen_seg[D_pos:D_pos + 2] in self.sub_codons_right[CDR3_seq[pos/3]]:
-                                Pi_R[:, pos] += current_PdelDldelDr*base_prob*self.PD_2nd_nt_pos_per_aa_vec[D_in][CDR3_seq[pos/3]][ :, D_pos]
+                            if cutD_gen_seg[D_pos:D_pos + 2] in self.sub_codons_right[CDR3_seq[pos//3]]:
+                                Pi_R[:, pos] += current_PdelDldelDr*base_prob*self.PD_2nd_nt_pos_per_aa_vec[D_in][CDR3_seq[pos//3]][ :, D_pos]
                             else:
                                 break #no longer aligned --- exit loop
                         #Position is the last nt in codon
                         else:
                             #check alignment
-                            if cutD_gen_seg[D_pos:D_pos + 3] in self.codons_dict[CDR3_seq[pos/3]]:
+                            if cutD_gen_seg[D_pos:D_pos + 3] in self.codons_dict[CDR3_seq[pos//3]]:
                                 Pi_R[0, pos] += current_PdelDldelDr*base_prob
                             else:
                                 break #no longer aligned --- exit loop
@@ -1497,21 +1505,21 @@ class GenerationProbabilityVDJ(GenerationProbability, PreprocessedParametersVDJ)
                         #Position is the first nt in codon
                         if pos%3 == 2:
                             #check alignment
-                            if cutD_gen_seg[D_pos] in self.sub_codons_right[CDR3_seq[pos/3]]:
+                            if cutD_gen_seg[D_pos] in self.sub_codons_right[CDR3_seq[pos//3]]:
                                 Pi_R[:, pos] += current_PdelDldelDr*base_prob*self.PD_nt_pos_vec[D_in][:, D_pos]
                             else:
                                 break #no longer aligned -- exit loop
                         #Position is the second nt in codon
                         elif pos%3 == 1:
                             #check alignment
-                            if cutD_gen_seg[D_pos:D_pos + 2] in self.sub_codons_right[CDR3_seq[pos/3]]:
-                                Pi_R[:, pos] += current_PdelDldelDr*base_prob*self.PD_2nd_nt_pos_per_aa_vec[D_in][CDR3_seq[pos/3]][ :, D_pos]
+                            if cutD_gen_seg[D_pos:D_pos + 2] in self.sub_codons_right[CDR3_seq[pos//3]]:
+                                Pi_R[:, pos] += current_PdelDldelDr*base_prob*self.PD_2nd_nt_pos_per_aa_vec[D_in][CDR3_seq[pos//3]][ :, D_pos]
                             else:
                                 break #no longer aligned --- exit loop
                         #Position is the last nt in codon
                         else:
                             #check alignment
-                            if cutD_gen_seg[D_pos:D_pos + 3] in self.codons_dict[CDR3_seq[pos/3]]:
+                            if cutD_gen_seg[D_pos:D_pos + 3] in self.codons_dict[CDR3_seq[pos//3]]:
                                 Pi_R[0, pos] += current_PdelDldelDr*base_prob
                             else:
                                 break #no longer aligned --- exit loop
@@ -1727,7 +1735,7 @@ class GenerationProbabilityVJ(GenerationProbability, PreprocessedParametersVJ):
             try:
                 cutV_gen_seg = self.cutV_genomic_CDR3_segs[V_in]
             except IndexError:
-                print 'Check provided V usage mask. Contains indicies out of allowed range.'
+                print('Check provided V usage mask. Contains indicies out of allowed range.')
                 continue
             current_alignment_length = self.max_nt_to_aa_alignment_left(CDR3_seq, cutV_gen_seg)
             alignment_lengths += [current_alignment_length]
@@ -1737,7 +1745,7 @@ class GenerationProbabilityVJ(GenerationProbability, PreprocessedParametersVJ):
                 #For first and last nt in a codon use PVdelV_nt_pos_vec
                 current_Pi_V[:, :current_alignment_length] = self.PVdelV_nt_pos_vec[V_in][:, :current_alignment_length]
                 for pos in range(1, current_alignment_length, 3): #for middle nt use PVdelV_2nd_nt_pos_per_aa_vec
-                    current_Pi_V[:, pos] = self.PVdelV_2nd_nt_pos_per_aa_vec[V_in][CDR3_seq[pos/3]][:, pos]
+                    current_Pi_V[:, pos] = self.PVdelV_2nd_nt_pos_per_aa_vec[V_in][CDR3_seq[pos//3]][:, pos]
                 for j, J_in in enumerate(J_usage_mask):
                     Pi_V_given_J[j][:, :current_alignment_length] += self.PVJ[V_in, J_in]*current_Pi_V[:, :current_alignment_length]
         
@@ -1811,16 +1819,16 @@ class GenerationProbabilityVJ(GenerationProbability, PreprocessedParametersVJ):
                 Pi_V_insVJ_given_J[j][:, init_pos] += self.PinsVJ[0]*Pi_V_given_J[j][:, init_pos]
                 
                 #One insertion
-                Pi_V_insVJ_given_J[j][:, init_pos+1] += self.PinsVJ[1]*np.dot(self.lDvj[CDR3_seq[init_pos/3]], Pi_V_given_J[j][:, init_pos])
+                Pi_V_insVJ_given_J[j][:, init_pos+1] += self.PinsVJ[1]*np.dot(self.lDvj[CDR3_seq[init_pos//3]], Pi_V_given_J[j][:, init_pos])
         
                 #Two insertions and compute the base nt vec for the standard loop        
-                current_base_nt_vec = np.dot(self.lTvj[CDR3_seq[init_pos/3]], Pi_V_given_J[j][:, init_pos])
+                current_base_nt_vec = np.dot(self.lTvj[CDR3_seq[init_pos//3]], Pi_V_given_J[j][:, init_pos])
                 Pi_V_insVJ_given_J[j][0, init_pos+2] += self.PinsVJ[2]*np.sum(current_base_nt_vec)
                 
                 base_ins = 2
                 
                 #Loop over all other insertions using base_nt_vec
-                for aa in CDR3_seq[init_pos/3 + 1: init_pos/3 + max_insertions/3]:
+                for aa in CDR3_seq[init_pos//3 + 1: init_pos//3 + max_insertions//3]:
                     Pi_V_insVJ_given_J[j][:, init_pos+base_ins+1] += self.PinsVJ[base_ins + 1]*np.dot(self.Svj[aa], current_base_nt_vec)
                     Pi_V_insVJ_given_J[j][:, init_pos+base_ins+2] += self.PinsVJ[base_ins + 2]*np.dot(self.Dvj[aa], current_base_nt_vec)
                     current_base_nt_vec = np.dot(self.Tvj[aa], current_base_nt_vec)
@@ -1838,7 +1846,7 @@ class GenerationProbabilityVJ(GenerationProbability, PreprocessedParametersVJ):
                 base_ins = 1
                 
                 #Loop over all other insertions using base_nt_vec
-                for aa in CDR3_seq[init_pos/3 + 1: init_pos/3 + max_insertions/3]:
+                for aa in CDR3_seq[init_pos//3 + 1: init_pos//3 + max_insertions//3]:
                     Pi_V_insVJ_given_J[j][:, init_pos+base_ins+1] += self.PinsVJ[base_ins + 1]*np.dot(self.Svj[aa], current_base_nt_vec)
                     Pi_V_insVJ_given_J[j][:, init_pos+base_ins+2] += self.PinsVJ[base_ins + 2]*np.dot(self.Dvj[aa], current_base_nt_vec)
                     current_base_nt_vec = np.dot(self.Tvj[aa], current_base_nt_vec)
@@ -1855,7 +1863,7 @@ class GenerationProbabilityVJ(GenerationProbability, PreprocessedParametersVJ):
                 base_ins = 0
                 
                 #Loop over all other insertions using base_nt_vec
-                for aa in CDR3_seq[init_pos/3 + 1: init_pos/3 + max_insertions/3]:
+                for aa in CDR3_seq[init_pos//3 + 1: init_pos//3 + max_insertions//3]:
                     Pi_V_insVJ_given_J[j][:, init_pos+base_ins+1] += self.PinsVJ[base_ins + 1]*np.dot(self.Svj[aa], current_base_nt_vec)
                     Pi_V_insVJ_given_J[j][:, init_pos+base_ins+2] += self.PinsVJ[base_ins + 2]*np.dot(self.Dvj[aa], current_base_nt_vec)
                     current_base_nt_vec = np.dot(self.Tvj[aa], current_base_nt_vec)
@@ -1915,7 +1923,7 @@ class GenerationProbabilityVJ(GenerationProbability, PreprocessedParametersVJ):
             try:
                 cutJ_gen_seg = self.cutJ_genomic_CDR3_segs[J_in]
             except IndexError:
-                print 'Check provided J usage mask. Contains indicies out of allowed range.'
+                print('Check provided J usage mask. Contains indicies out of allowed range.')
                 continue
             current_alignment_length = self.max_nt_to_aa_alignment_right(CDR3_seq, cutJ_gen_seg)
             #alignment_lengths += [current_alignment_length]
@@ -1925,7 +1933,7 @@ class GenerationProbabilityVJ(GenerationProbability, PreprocessedParametersVJ):
                 #For first and last nt in a codon use PJdelJ_nt_pos_vec
                 current_Pi_J[:, -current_alignment_length:] = self.PJdelJ_nt_pos_vec[J_in][:, -current_alignment_length:]          
                 for pos in range(-2, -current_alignment_length-1, -3): #for middle nt use PJdelJ_2nd_nt_pos_per_aa_vec
-                    current_Pi_J[:, pos] = self.PJdelJ_2nd_nt_pos_per_aa_vec[J_in][CDR3_seq[pos/3]][:, pos]
+                    current_Pi_J[:, pos] = self.PJdelJ_2nd_nt_pos_per_aa_vec[J_in][CDR3_seq[pos//3]][:, pos]
                 if np.sum(current_Pi_J) > 0:
                     Pi_J.append(current_Pi_J)
                     r_J_usage_mask.append(J_in)

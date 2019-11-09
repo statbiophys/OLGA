@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """Command line script to compute Pgens of CDR3 sequences.
 
@@ -251,15 +251,28 @@ Options:
 
 #Function assumes that it is in the same directory that the folder app/ is
 #in (which should contain all the modules imported).
-
+from __future__ import print_function, division
 import os
 import sys
 import time
 
-import olga.load_model as load_model
-import olga.generation_probability as generation_probability
-from olga.utils import nt2aa, determine_seq_type
+#import olga.load_model as load_model
+#import olga.generation_probability as generation_probability
+#from olga.utils import nt2aa, determine_seq_type
+#
+import load_model
+import generation_probability
+from utils import nt2aa, determine_seq_type, gene_to_num_str
+
 from optparse import OptionParser
+
+#Set input = raw_input for python 2
+try:
+    import __builtin__
+    input = getattr(__builtin__, 'raw_input')
+except (ImportError, AttributeError):
+    pass
+
 
 #Need to determine what mode to run in.
 #1) Sequences as args
@@ -320,7 +333,7 @@ def main():
     default_models['mouseTRB'] = [os.path.join(main_folder, 'default_models', 'mouse_T_beta'), 'VDJ']
     default_models['humanIGH'] = [os.path.join(main_folder, 'default_models', 'human_B_heavy'), 'VDJ']
 
-    num_models_specified = sum([1 for x in default_models.keys() + ['vj_model_folder', 'vdj_model_folder'] if getattr(options, x)])
+    num_models_specified = sum([1 for x in list(default_models.keys()) + ['vj_model_folder', 'vdj_model_folder'] if getattr(options, x)])
 
     if num_models_specified == 1: #exactly one model specified
         try:
@@ -335,18 +348,18 @@ def main():
                 model_folder = options.vj_model_folder
                 recomb_type = 'VJ'
     elif num_models_specified == 0:
-        print 'Need to indicate generative model.'
-        print 'Exiting...'
+        print('Need to indicate generative model.')
+        print('Exiting...')
         return -1
     elif num_models_specified > 1:
-        print 'Only specify one model'
-        print 'Exiting...'
+        print('Only specify one model')
+        print('Exiting...')
         return -1
 
     #Check that all model and genomic files exist in the indicated model folder
     if not os.path.isdir(model_folder):
-        print 'Check pathing... cannot find the model folder: ' + model_folder
-        print 'Exiting...'
+        print('Check pathing... cannot find the model folder: ' + model_folder)
+        print('Exiting...')
         return -1
 
     params_file_name = os.path.join(model_folder,'model_params.txt')
@@ -356,16 +369,16 @@ def main():
 
     for x in [params_file_name, marginals_file_name, V_anchor_pos_file, J_anchor_pos_file]:
         if not os.path.isfile(x):
-            print 'Cannot find: ' + x
-            print 'Please check the files (and naming conventions) in the model folder ' + model_folder
-            print 'Exiting...'
+            print('Cannot find: ' + x)
+            print('Please check the files (and naming conventions) in the model folder ' + model_folder)
+            print('Exiting...')
             return -1
 
     alphabet_filename = options.alphabet_filename #used if a custom alphabet is to be specified
     if alphabet_filename is not None:
         if not os.path.isfile(alphabet_filename):
-            print 'Cannot find custom alphabet file: ' + infile_name
-            print 'Exiting...'
+            print('Cannot find custom alphabet file: ' + alphabet_filename)
+            print('Exiting...')
             return -1
 
     #Load up model based on recomb_type
@@ -390,15 +403,15 @@ def main():
         infile_name = options.infile_name
 
         if not os.path.isfile(infile_name):
-            print 'Cannot find input file: ' + infile_name
-            print 'Exiting...'
+            print('Cannot find input file: ' + infile_name)
+            print('Exiting...')
             return -1
 
     if options.outfile_name is not None:
         outfile_name = options.outfile_name
         if os.path.isfile(outfile_name):
-            if not raw_input(outfile_name + ' already exists. Overwrite (y/n)? ').strip().lower() in ['y', 'yes']:
-                print 'Exiting...'
+            if not input(outfile_name + ' already exists. Overwrite (y/n)? ').strip().lower() in ['y', 'yes']:
+                print('Exiting...')
                 return -1
 
     #Parse delimiter
@@ -471,7 +484,7 @@ def main():
         seq_types = [determine_seq_type(seq, aa_alphabet) for seq in seqs]
         unrecognized_seqs = [seq for i, seq in enumerate(seqs) if seq_types[i] is None]
         if len(unrecognized_seqs) > 0 and print_warnings:
-            print 'The following sequences/arguments were not recognized: ' + ', '.join(unrecognized_seqs)
+            print('The following sequences/arguments were not recognized: ' + ', '.join(unrecognized_seqs))
         seqs = [seq for i, seq in enumerate(seqs) if seq_types[i] is not None]
         seq_types = [seq_type for seq_type in seq_types if seq_type is not None]
 
@@ -479,59 +492,59 @@ def main():
         #Format V and J masks -- uniform for all argument input sequences
         try:
             V_mask = options.V_mask.split(',')
-            unrecognized_v_genes = [v for v in V_mask if v not in pgen_model.V_mask_mapping.keys()]
-            V_mask = [v for v in V_mask if v in pgen_model.V_mask_mapping.keys()]
+            unrecognized_v_genes = [v for v in V_mask if gene_to_num_str(v, 'V') not in pgen_model.V_mask_mapping.keys()]
+            V_mask = [v for v in V_mask if gene_to_num_str(v, 'V') in pgen_model.V_mask_mapping.keys()]
             if len(unrecognized_v_genes) > 0:
-                print 'These V genes/alleles are not recognized: ' + ', '.join(unrecognized_v_genes)
+                print('These V genes/alleles are not recognized: ' + ', '.join(unrecognized_v_genes))
             if len(V_mask) == 0:
-                print 'No recognized V genes/alleles in the provided V_mask. Continuing without conditioning on V usage.'
+                print('No recognized V genes/alleles in the provided V_mask. Continuing without conditioning on V usage.')
                 V_mask = None
         except AttributeError:
             V_mask = options.V_mask #Default is None, i.e. not conditioning on V identity
 
         try:
             J_mask = options.J_mask.split(',')
-            unrecognized_j_genes = [j for j in J_mask if j not in pgen_model.J_mask_mapping.keys()]
-            J_mask = [j for j in J_mask if j in pgen_model.J_mask_mapping.keys()]
+            unrecognized_j_genes = [j for j in J_mask if gene_to_num_str(j, 'J') not in pgen_model.J_mask_mapping.keys()]
+            J_mask = [j for j in J_mask if gene_to_num_str(j, 'J') in pgen_model.J_mask_mapping.keys()]
             if len(unrecognized_j_genes) > 0:
-                print 'These J genes/alleles are not recognized: ' + ', '.join(unrecognized_j_genes)
+                print('These J genes/alleles are not recognized: ' + ', '.join(unrecognized_j_genes))
             if len(J_mask) == 0:
-                print 'No recognized J genes/alleles in the provided J_mask. Continuing without conditioning on J usage.'
+                print('No recognized J genes/alleles in the provided J_mask. Continuing without conditioning on J usage.')
                 J_mask = None
         except AttributeError:
             J_mask = options.J_mask #Default is None, i.e. not conditioning on J identity
 
-        print ''
+        print('')
         start_time = time.time()
         for seq, seq_type in zip(seqs, seq_types):
             if seq_type == 'aaseq':
                 c_pgen = pgen_model.compute_aa_CDR3_pgen(seq, V_mask, J_mask, print_warnings)
-                print 'Pgen of the amino acid sequence ' + seq + ': ' + str(c_pgen)
-                print ''
+                print('Pgen of the amino acid sequence ' + seq + ': ' + str(c_pgen))
+                print('')
             elif seq_type == 'regex':
                 c_pgen = pgen_model.compute_regex_CDR3_template_pgen(seq, V_mask, J_mask, print_warnings)
-                print 'Pgen of the regular expression sequence ' + seq + ': ' + str(c_pgen)
-                print ''
+                print('Pgen of the regular expression sequence ' + seq + ': ' + str(c_pgen))
+                print('')
             elif seq_type == 'ntseq':
                 if seq_type_out is None or seq_type_out == 'ntseq':
                     c_pgen_nt = pgen_model.compute_nt_CDR3_pgen(seq, V_mask, J_mask, print_warnings)
-                    print 'Pgen of the nucleotide sequence ' + seq + ': ' + str(c_pgen_nt)
+                    print('Pgen of the nucleotide sequence ' + seq + ': ' + str(c_pgen_nt))
                 if seq_type_out is None or seq_type_out == 'aaseq':
                     c_pgen_aa = pgen_model.compute_aa_CDR3_pgen(nt2aa(seq), V_mask, J_mask, print_warnings)
-                    print 'Pgen of the amino acid sequence nt2aa(' + seq + ') = ' + nt2aa(seq) + ': ' + str(c_pgen_aa)
-                print ''
+                    print('Pgen of the amino acid sequence nt2aa(' + seq + ') = ' + nt2aa(seq) + ': ' + str(c_pgen_aa))
+                print('')
 
         c_time = time.time() - start_time
         if c_time > 86400: #more than a day
-            c_time_str = '%d days, %d hours, %d minutes, and %.2f seconds.'%(int(c_time)/86400, (int(c_time)/3600)%24, (int(c_time)/60)%60, c_time%60)
+            c_time_str = '%d days, %d hours, %d minutes, and %.2f seconds.'%(int(c_time)//86400, (int(c_time)//3600)%24, (int(c_time)//60)%60, c_time%60)
         elif c_time > 3600: #more than an hr
-            c_time_str = '%d hours, %d minutes, and %.2f seconds.'%((int(c_time)/3600)%24, (int(c_time)/60)%60, c_time%60)
+            c_time_str = '%d hours, %d minutes, and %.2f seconds.'%((int(c_time)//3600)%24, (int(c_time)//60)%60, c_time%60)
         elif c_time > 60: #more than a min
-            c_time_str = '%d minutes and %.2f seconds.'%((int(c_time)/60)%60, c_time%60)
+            c_time_str = '%d minutes and %.2f seconds.'%((int(c_time)//60)%60, c_time%60)
         else:
             c_time_str = '%.2f seconds.'%(c_time)
 
-        print 'Completed pgen computation in: ' + c_time_str
+        print('Completed pgen computation in: ' + c_time_str)
 
     else: #Read sequences in from file
         print_warnings = False #Most cases of reading in from file should have warnings disabled
@@ -569,8 +582,8 @@ def main():
             except IndexError: #no index match for seq
                 if skip_empty and len(line.strip()) == 0:
                     continue
-                print 'seq_in_index is out of range'
-                print 'Exiting...'
+                print('seq_in_index is out of range')
+                print('Exiting...')
                 infile.close()
                 return -1
 
@@ -581,17 +594,17 @@ def main():
                 try:
                     V_usage_mask = split_line[V_mask_index].strip().split(gene_mask_delimiter)
                     #check that all V gene/allele names are recognized
-                    if all([v in pgen_model.V_mask_mapping for v in V_usage_mask]):
+                    if all([gene_to_num_str(v, 'V') in pgen_model.V_mask_mapping for v in V_usage_mask]):
                         V_usage_masks.append(V_usage_mask)
                     else:
-                        print str(V_usage_mask) + " is not a usable V_usage_mask composed exclusively of recognized V gene/allele names"
-                        print 'Unrecognized V gene/allele names: ' + ', '.join([v for v in V_usage_mask if not v in pgen_model.V_mask_mapping.keys()])
-                        print 'Exiting...'
+                        print(str(V_usage_mask) + " is not a usable V_usage_mask composed exclusively of recognized V gene/allele names")
+                        print('Unrecognized V gene/allele names: ' + ', '.join([v for v in V_usage_mask if gene_to_num_str(v, 'V') not in pgen_model.V_mask_mapping.keys()]))
+                        print('Exiting...')
                         infile.close()
                         return -1
                 except IndexError: #no index match for V_mask_index
-                    print 'V_mask_index is out of range'
-                    print 'Exiting...'
+                    print('V_mask_index is out of range')
+                    print('Exiting...')
                     infile.close()
                     return -1
 
@@ -602,17 +615,17 @@ def main():
                 try:
                     J_usage_mask = split_line[J_mask_index].strip().split(gene_mask_delimiter)
                     #check that all V gene/allele names are recognized
-                    if all([j in pgen_model.J_mask_mapping for j in J_usage_mask]):
+                    if all([gene_to_num_str(j, 'J') in pgen_model.J_mask_mapping for j in J_usage_mask]):
                         J_usage_masks.append(J_usage_mask)
                     else:
-                        print str(J_usage_mask) + " is not a usable J_usage_mask composed exclusively of recognized J gene/allele names"
-                        print 'Unrecognized J gene/allele names: ' + ', '.join([j for j in J_usage_mask if not j in pgen_model.J_mask_mapping.keys()])
-                        print 'Exiting...'
+                        print(str(J_usage_mask) + " is not a usable J_usage_mask composed exclusively of recognized J gene/allele names")
+                        print('Unrecognized J gene/allele names: ' + ', '.join([j for j in J_usage_mask if gene_to_num_str(j, 'J') not in pgen_model.J_mask_mapping.keys()]))
+                        print('Exiting...')
                         infile.close()
                         return -1
                 except IndexError: #no index match for J_mask_index
-                    print 'J_mask_index is out of range'
-                    print 'Exiting...'
+                    print('J_mask_index is out of range')
+                    print('Exiting...')
                     infile.close()
                     return -1
 
@@ -624,19 +637,20 @@ def main():
         unrecognized_seqs = [seq for i, seq in enumerate(seqs) if seq_types[i] is None]
         if len(unrecognized_seqs) > 0 and len(unrecognized_seqs) < len(seqs):
             if print_warnings or options.outfile_name is not None:
-                print 'Some strings read in were not parsed as sequences -- they will be omitted.'
-                print 'Examples of improperly read strings: '
+                print('Some strings read in were not parsed as sequences -- they will be omitted.')
+                print('Examples of improperly read strings: ')
                 for unrecognized_seq in unrecognized_seqs[:10]:
-                    print unrecognized_seq
+                    print(unrecognized_seq)
             seqs = [seq for i, seq in enumerate(seqs) if seq_types[i] is not None]
             V_usage_masks = [V_usage_mask for i, V_usage_mask in enumerate(V_usage_masks) if seq_types[i] is not None]
+            J_usage_masks = [J_usage_mask for i, J_usage_mask in enumerate(J_usage_masks) if seq_types[i] is not None]
             seq_types = [seq_type for seq_type in seq_types if seq_type is not None]
         elif len(unrecognized_seqs) > 0 and len(unrecognized_seqs) == len(seqs):
-            print 'None of the read in strings were parsed as sequences. Check input file.'
-            print 'Examples of improperly read strings:'
+            print('None of the read in strings were parsed as sequences. Check input file.')
+            print('Examples of improperly read strings:')
             for unrecognized_seq in unrecognized_seqs[:10]:
-                print unrecognized_seq
-            print 'Exiting...'
+                print(unrecognized_seq)
+            print('Exiting...')
             return -1
 
         infile.close()
@@ -644,7 +658,7 @@ def main():
 
         if options.outfile_name is not None: #OUTFILE SPECIFIED, allow printed info/display
 
-            print 'Successfully read in and formatted ' + str(len(seqs)) + ' sequences and any V or J usages.'
+            print('Successfully read in and formatted ' + str(len(seqs)) + ' sequences and any V or J usages.')
             if display_seqs:
                 sys.stdout.write('\r'+'Continuing to Pgen computation in 3... ')
                 sys.stdout.flush()
@@ -656,7 +670,7 @@ def main():
                 sys.stdout.flush()
                 time.sleep(0.4)
             else:
-                print 'Continuing to Pgen computation.'
+                print('Continuing to Pgen computation.')
                 print_warnings = True #Display is off, can print warnings
 
             if display_seqs:
@@ -698,7 +712,7 @@ def main():
                     cc_time = time.time()
                     c_time = cc_time - start_time
                     times_for_speed_calc = [cc_time] + times_for_speed_calc[:num_lines_for_display]
-                    c_avg_speed = (len(times_for_speed_calc)-1)/float(times_for_speed_calc[0] - times_for_speed_calc[-1])
+                    c_avg_speed = (len(times_for_speed_calc)-1)/(times_for_speed_calc[0] - times_for_speed_calc[-1])
 
                     #eta = ((len(seqs) - (i+1))/float(i+1))*c_time
 
@@ -707,45 +721,45 @@ def main():
                     lines_for_display = [c_pgen_line] + lines_for_display[:num_lines_for_display]
 
 
-                    c_time_str = '%s hours, %s minutes, and %s seconds.'%(repr(int(c_time)/3600).rjust(3), repr((int(c_time)/60)%60).rjust(2), repr(int(c_time)%60).rjust(2))
-                    eta_str = '%s hours, %s minutes, and %s seconds.'%(repr(int(eta)/3600).rjust(3), repr((int(eta)/60)%60).rjust(2), repr(int(eta)%60).rjust(2))
+                    c_time_str = '%s hours, %s minutes, and %s seconds.'%(repr(int(c_time)//3600).rjust(3), repr((int(c_time)//60)%60).rjust(2), repr(int(c_time)%60).rjust(2))
+                    eta_str = '%s hours, %s minutes, and %s seconds.'%(repr(int(eta)//3600).rjust(3), repr((int(eta)//60)%60).rjust(2), repr(int(eta)%60).rjust(2))
                     time_str = 'Time to compute Pgen on %s seqs: %s \nEst. time for remaining %s seqs: %s'%(repr(i+1).rjust(9), c_time_str, repr(len(seqs) - (i + 1)).rjust(9), eta_str)
-                    speed_str = 'Current Pgen computation speed: %s seqs/min'%(repr(round((len(times_for_speed_calc)-1)*60/float(times_for_speed_calc[0] - times_for_speed_calc[-1]), 2)).rjust(8))
+                    speed_str = 'Current Pgen computation speed: %s seqs/min'%(repr(round((len(times_for_speed_calc)-1)*60/(times_for_speed_calc[0] - times_for_speed_calc[-1]), 2)).rjust(8))
                     display_str = '\n'.join(lines_for_display[::-1]) + '\n' + '-'*80 + '\n' + time_str + '\n' + speed_str + '\n' + '-'*80
-                    print '\033[2J' + display_str
+                    print('\033[2J' + display_str)
                 elif (i+1)%seqs_per_time_update == 0 and time_updates:
                     c_time = time.time() - start_time
-                    eta = ((len(seqs) - (i+1))/float(i+1))*c_time
+                    eta = ((len(seqs) - (i+1))/(i+1))*c_time
                     if c_time > 86400: #more than a day
-                        c_time_str = '%d days, %d hours, %d minutes, and %.2f seconds.'%(int(c_time)/86400, (int(c_time)/3600)%24, (int(c_time)/60)%60, c_time%60)
+                        c_time_str = '%d days, %d hours, %d minutes, and %.2f seconds.'%(int(c_time)//86400, (int(c_time)//3600)%24, (int(c_time)//60)%60, c_time%60)
                     elif c_time > 3600: #more than an hr
-                        c_time_str = '%d hours, %d minutes, and %.2f seconds.'%((int(c_time)/3600)%24, (int(c_time)/60)%60, c_time%60)
+                        c_time_str = '%d hours, %d minutes, and %.2f seconds.'%((int(c_time)//3600)%24, (int(c_time)//60)%60, c_time%60)
                     elif c_time > 60: #more than a min
-                        c_time_str = '%d minutes and %.2f seconds.'%((int(c_time)/60)%60, c_time%60)
+                        c_time_str = '%d minutes and %.2f seconds.'%((int(c_time)//60)%60, c_time%60)
                     else:
                         c_time_str = '%.2f seconds.'%(c_time)
 
                     if eta > 86400: #more than a day
-                        eta_str = '%d days, %d hours, %d minutes, and %.2f seconds.'%(int(eta)/86400, (int(eta)/3600)%24, (int(eta)/60)%60, eta%60)
+                        eta_str = '%d days, %d hours, %d minutes, and %.2f seconds.'%(int(eta)//86400, (int(eta)//3600)%24, (int(eta)//60)%60, eta%60)
                     elif eta > 3600: #more than an hr
-                        eta_str = '%d hours, %d minutes, and %.2f seconds.'%((int(eta)/3600)%24, (int(eta)/60)%60, eta%60)
+                        eta_str = '%d hours, %d minutes, and %.2f seconds.'%((int(eta)//3600)%24, (int(eta)//60)%60, eta%60)
                     elif eta > 60: #more than a min
-                        eta_str = '%d minutes and %.2f seconds.'%((int(eta)/60)%60, eta%60)
+                        eta_str = '%d minutes and %.2f seconds.'%((int(eta)//60)%60, eta%60)
                     else:
                         eta_str = '%.2f seconds.'%(eta)
 
-                    print 'Pgen computed for %d sequences in: %s Estimated time remaining: %s'%(i+1, c_time_str, eta_str)
+                    print('Pgen computed for %d sequences in: %s Estimated time remaining: %s'%(i+1, c_time_str, eta_str))
 
             c_time = time.time() - start_time
             if c_time > 86400: #more than a day
-                c_time_str = '%d days, %d hours, %d minutes, and %.2f seconds.'%(int(c_time)/86400, (int(c_time)/3600)%24, (int(c_time)/60)%60, c_time%60)
+                c_time_str = '%d days, %d hours, %d minutes, and %.2f seconds.'%(int(c_time)//86400, (int(c_time)//3600)%24, (int(c_time)//60)%60, c_time%60)
             elif c_time > 3600: #more than an hr
-                c_time_str = '%d hours, %d minutes, and %.2f seconds.'%((int(c_time)/3600)%24, (int(c_time)/60)%60, c_time%60)
+                c_time_str = '%d hours, %d minutes, and %.2f seconds.'%((int(c_time)//3600)%24, (int(c_time)//60)%60, c_time%60)
             elif c_time > 60: #more than a min
-                c_time_str = '%d minutes and %.2f seconds.'%((int(c_time)/60)%60, c_time%60)
+                c_time_str = '%d minutes and %.2f seconds.'%((int(c_time)//60)%60, c_time%60)
             else:
                 c_time_str = '%.2f seconds.'%(c_time)
-            print 'Completed Pgen computation for %d sequences: in %s'%(len(seqs), c_time_str)
+            print('Completed Pgen computation for %d sequences: in %s'%(len(seqs), c_time_str))
 
             outfile.close()
 
@@ -777,6 +791,6 @@ def main():
                         elif seq_type_out == 'aaseq':
                             c_pgen_line = 'out_of_frame' + delimiter_out + '0'
 
-                print c_pgen_line
+                print(c_pgen_line)
 
 if __name__ == '__main__': main()

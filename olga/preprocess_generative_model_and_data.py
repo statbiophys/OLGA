@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """Process classes GenerativeModelV(D)J GenomicModelV(D)J before computing Pgen.
 
@@ -38,7 +38,7 @@ GenerationProbabilityV(D)J.
 @author: zacharysethna
 
 """
-
+from __future__ import division
 import numpy as np
 from utils import construct_codons_dict, generate_sub_codons_left, generate_sub_codons_right, calc_steady_state_dist, gene_to_num_str
 

@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """Define classes for V(D)J generative models and genomic data.
 
@@ -81,6 +81,7 @@ are adapted from Quentin Marcou (author of IGoR).
 @author: zacharysethna
 
 """
+from __future__ import print_function, division
 import numpy as np
 from utils import cutR_seq, cutL_seq, calc_S_single_gene, calc_S_joint_genes, calc_Sins
 
@@ -796,7 +797,7 @@ class GenerativeModelVDJ(object):
                     PVDJ[v_in, :, j_in] = PVJ[v_in, j_in]*raw_model[0]['d_gene'][v_in, j_in, :]
             self.PDJ = np.sum(PVDJ, 0)
         else:
-            print 'Unrecognized model structure -- need to construct P(D, J)'
+            print('Unrecognized model structure -- need to construct P(D, J)')
             return 0
         
         self.PdelDldelDr_given_D = np.transpose(np.multiply(np.transpose(raw_model[0]['d_3_del'], (2, 0, 1)), raw_model[0]['d_5_del']), (2, 0 , 1))
@@ -1023,7 +1024,7 @@ def read_igor_marginals_txt(marginals_file_name , dim_names=False):
                 #Add last dimension and get rid of the closing bracket 
                 marginals_values.append(float(strip_line[previous_coma_index+1:]))
                 if len(marginals_values)!=dimensions[-1]:
-                    print "problem"
+                    print("problem")
                 element_marginal_array[tuple(indices_array)] = marginals_values
         model_dict[element_name] = element_marginal_array				
         
