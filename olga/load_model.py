@@ -810,6 +810,8 @@ class GenerativeModelVDJ(object):
         #Compute Entropies
         SV, SdelV = calc_S_single_gene(self.PV, self.PdelV_given_V)
         SDJ, SdelD, SdelJ = calc_S_joint_genes(self.PDJ, self.PdelDldelDr_given_D, self.PdelJ_given_J)
+        
+        #Current IGoR models don't have first nt biases -- use default of steady state
         SinsVD, S_n1_markov = calc_Sins(self.PinsVD, self.Rvd)
         SinsDJ, S_n2_markov = calc_Sins(self.PinsDJ, self.Rdj)
         

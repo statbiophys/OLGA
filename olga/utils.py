@@ -490,11 +490,12 @@ def calc_S_joint_genes(PG1G2, PdelG1_given_G1, PdelG2_given_G2, base = 2):
         
     return SG1G2, SdelG1, SdelG2
 
-def calc_Sins(Pins, R, base = 2):
+def calc_Sins(Pins, R, p_0 = None, base = 2):
     """Calculate the entropy of an insertion junction.
+
+    Entropy of nucleotide choice in the Markov model is given by:
+    H(p_0)(1-Pins[0]) + \sum_{l=2}Pins[l] \sum_{k=2}^l \sum_m R^{k-1}p_0(m) H(R[:, m])
     
-    Currently this function computes the entropy assuming the Markov model is
-    in steady-state.
     
     Parameters
     ----------
@@ -513,12 +514,18 @@ def calc_Sins(Pins, R, base = 2):
     Sins : float
         Entropy of Pins (entropy of length distribution)
     Smarkov : float
-        Entropy contribution of choice of nucleotides in the Markov model.
+        Entropy of nucleotide choice in the Markov model.
         
     """
     Sins = calc_S(Pins, base)
-    p_ss = calc_steady_state_dist(R)
-    av_l_ins = np.dot(Pins, np.arange(len(Pins)))
-    Smarkov = calc_S(p_ss, base) + (av_l_ins - 1) * np.sum([p_ss[m]*calc_S(R[:, m], base) for m in range(4)])
+    if p_0 is None: #Use steady state if no p_0 given
+        p_0 = calc_steady_state_dist(R)
+    cr_Pins = Pins[::-1].cumsum()[::-1]
+    
+    Smarkov = calc_S(p_0, base)*(1-Pins[0])
+    p_k = p_0
+    for k in range(2, len(Pins)):
+        p_k = np.dot(R, p_k)
+        Smarkov += cr_Pins[k] * np.sum([p_k[m]*calc_S(R[:, m], base) for m in range(4)])
     
     return Sins, Smarkov
