@@ -60,7 +60,7 @@ Example
 """
 from __future__ import division
 import numpy as np
-from utils import nt2aa, calc_steady_state_dist
+from olga.utils import nt2aa, calc_steady_state_dist
 
 class SequenceGenerationVDJ(object):
     """Class of to generate sequences from a VDJ generative model.
@@ -162,12 +162,12 @@ class SequenceGenerationVDJ(object):
         self.C_Rvd = generative_model.Rvd.T.cumsum(axis = 1)
         self.C_Rdj = generative_model.Rdj.T.cumsum(axis = 1)
 
-        if generative_model.first_nt_bias_insVD == None:
+        if generative_model.first_nt_bias_insVD is None:
             first_nt_bias_insVD = calc_steady_state_dist(generative_model.Rvd)
         else:
             first_nt_bias_insVD = generative_model.first_nt_bias_insVD
 
-        if generative_model.first_nt_bias_insDJ == None:
+        if generative_model.first_nt_bias_insDJ is None:
             first_nt_bias_insDJ = calc_steady_state_dist(generative_model.Rdj)
         else:
             first_nt_bias_insDJ = generative_model.first_nt_bias_insDJ

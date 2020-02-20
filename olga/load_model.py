@@ -83,7 +83,7 @@ are adapted from Quentin Marcou (author of IGoR).
 """
 from __future__ import print_function, division
 import numpy as np
-from utils import cutR_seq, cutL_seq, calc_S_single_gene, calc_S_joint_genes, calc_Sins
+from olga.utils import cutR_seq, cutL_seq, calc_S_single_gene, calc_S_joint_genes, calc_Sins
 
 #%% GenomicData class definitions
 class GenomicData(object):

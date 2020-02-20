@@ -40,7 +40,7 @@ GenerationProbabilityV(D)J.
 """
 from __future__ import division
 import numpy as np
-from utils import construct_codons_dict, generate_sub_codons_left, generate_sub_codons_right, calc_steady_state_dist, gene_to_num_str
+from olga.utils import construct_codons_dict, generate_sub_codons_left, generate_sub_codons_right, calc_steady_state_dist, gene_to_num_str
 
 class PreprocessedParameters(object):
     """Class used to preprocess the parameters that both VDJ and VJ models have.

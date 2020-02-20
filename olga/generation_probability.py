@@ -67,8 +67,8 @@ Example
 from __future__ import print_function, division
 import numpy as np
 import re
-from utils import nt2codon_rep, gene_to_num_str
-from preprocess_generative_model_and_data import PreprocessedParametersVDJ, PreprocessedParametersVJ
+from olga.utils import nt2codon_rep, gene_to_num_str
+from olga.preprocess_generative_model_and_data import PreprocessedParametersVDJ, PreprocessedParametersVJ
 
 #Set input = raw_input for python 2
 try:

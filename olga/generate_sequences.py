@@ -132,10 +132,10 @@ string is 'FVW'.
 #in (which should contain all the modules imported).
 from __future__ import print_function, division
 import os
-#import olga.load_model as load_model
-#import olga.sequence_generation as sequence_generation
-import load_model as load_model
-import sequence_generation as sequence_generation
+import olga.load_model as load_model
+import olga.sequence_generation as sequence_generation
+#import load_model as load_model
+#import sequence_generation as sequence_generation
 from optparse import OptionParser
 import time
 import numpy as np

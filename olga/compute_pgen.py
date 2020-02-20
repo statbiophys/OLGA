@@ -256,13 +256,13 @@ import os
 import sys
 import time
 
-#import olga.load_model as load_model
-#import olga.generation_probability as generation_probability
-#from olga.utils import nt2aa, determine_seq_type
+import olga.load_model as load_model
+import olga.generation_probability as generation_probability
+from olga.utils import nt2aa, determine_seq_type
 #
-import load_model
-import generation_probability
-from utils import nt2aa, determine_seq_type, gene_to_num_str
+#import load_model
+#import generation_probability
+#from utils import nt2aa, determine_seq_type, gene_to_num_str
 
 from optparse import OptionParser
 
