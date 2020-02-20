@@ -1,15 +1,15 @@
 from setuptools import setup, find_packages
 
-def readme():
-    with open('README.md') as f:
-        return f.read()
+# def readme():
+#     with open('README.md') as f:
+#         return f.read()
 
 data_files_to_include = [('', ['README.md', 'LICENSE', 'example_expanded_amino_acid_alphabet.txt'])]
 
 setup(name='olga',
-      version='1.1.1',
+      version='1.1.3',
       description='Compute generation probability of CDR3 sequences',
-      long_description=readme(),
+      long_description='text/markdown',
       url='https://github.com/zsethna/OLGA',
       author='Zachary Sethna',
       author_email='zachary.sethna@gmail.com',
