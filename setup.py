@@ -25,6 +25,7 @@ setup(name='olga',
             'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
             'Natural Language :: English',
             'Programming Language :: Python :: 2.7',
+            'Programming Language :: Python :: 3.6',
             ],
       packages=find_packages(),
       package_data = {
