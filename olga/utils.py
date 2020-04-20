@@ -379,7 +379,7 @@ def gene_to_num_str(gene_name, gene_type):
         
     """
 
-    num_str = gene_name.lower().split(gene_type.lower())[-1]
+    num_str = ''.join(gene_name.lower().split(gene_type.lower())[1:])
     num_str = '-'.join([g.lstrip('0') for g in num_str.split('-')])
     num_str = '*'.join([g.lstrip('0') for g in num_str.split('*')])
     
