@@ -171,6 +171,8 @@ Options:
                         use default mouse TRB model (T cell beta chain)
   --humanIGH, --human_B_heavy
                         use default human IGH model (B cell heavy chain)
+  --humanIGK
+                        use default human IGK model
   --set_custom_model_VDJ=PATH/TO/FOLDER/
                         specify PATH/TO/FOLDER/ for a custom VDJ generative
                         model
@@ -255,10 +257,13 @@ from __future__ import print_function, division
 import os
 import sys
 import time
-
+import subprocess
+reqs = subprocess.check_output([sys.executable, '-m', 'pip', 'freeze'])
+installed_packages = [r.decode().split('==')[0] for r in reqs.split()]
+if 'olga' not in installed_packages: sys.path.insert(0, os.path.split(os.path.dirname(os.path.abspath(__file__)))[0])
 import olga.load_model as load_model
 import olga.generation_probability as generation_probability
-from olga.utils import nt2aa, determine_seq_type
+from olga.utils import nt2aa, determine_seq_type, gene_to_num_str
 #
 #import load_model
 #import generation_probability
@@ -289,6 +294,7 @@ def main():
     parser.add_option('--humanTRB', '--human_T_beta', action='store_true', dest='humanTRB', default=False, help='use default human TRB model (T cell beta chain)')
     parser.add_option('--mouseTRB', '--mouse_T_beta', action='store_true', dest='mouseTRB', default=False, help='use default mouse TRB model (T cell beta chain)')
     parser.add_option('--humanIGH', '--human_B_heavy', action='store_true', dest='humanIGH', default=False, help='use default human IGH model (B cell heavy chain)')
+    parser.add_option('--humanIGK', action='store_true', dest='humanIGK', default=False, help='use default human IGK model')
     parser.add_option('--set_custom_model_VDJ', dest='vdj_model_folder', metavar='PATH/TO/FOLDER/', help='specify PATH/TO/FOLDER/ for a custom VDJ generative model')
     parser.add_option('--set_custom_model_VJ', dest='vj_model_folder', metavar='PATH/TO/FOLDER/', help='specify PATH/TO/FOLDER/ for a custom VJ generative model')
 
@@ -332,6 +338,7 @@ def main():
     default_models['humanTRB'] = [os.path.join(main_folder, 'default_models', 'human_T_beta'), 'VDJ']
     default_models['mouseTRB'] = [os.path.join(main_folder, 'default_models', 'mouse_T_beta'), 'VDJ']
     default_models['humanIGH'] = [os.path.join(main_folder, 'default_models', 'human_B_heavy'), 'VDJ']
+    default_models['humanIGK'] = [os.path.join(main_folder, 'default_models', 'human_IGK'), 'VJ']
 
     num_models_specified = sum([1 for x in list(default_models.keys()) + ['vj_model_folder', 'vdj_model_folder'] if getattr(options, x)])
 

@@ -80,6 +80,8 @@ Options:
                         use default mouse TRB model (T cell beta chain)
   --humanIGH, --human_B_heavy
                         use default human IGH model (B cell heavy chain)
+  --humanIGK
+                        use default human IGK model
   --VDJ_model_folder=PATH/TO/FOLDER/
                         specify PATH/TO/FOLDER/ for a custom VDJ generative
                         model
@@ -132,6 +134,11 @@ string is 'FVW'.
 #in (which should contain all the modules imported).
 from __future__ import print_function, division
 import os
+import sys
+import subprocess
+reqs = subprocess.check_output([sys.executable, '-m', 'pip', 'freeze'])
+installed_packages = [r.decode().split('==')[0] for r in reqs.split()]
+if 'olga' not in installed_packages: sys.path.insert(0, os.path.split(os.path.dirname(os.path.abspath(__file__)))[0])
 import olga.load_model as load_model
 import olga.sequence_generation as sequence_generation
 #import load_model as load_model
@@ -156,6 +163,8 @@ def main():
     parser.add_option('--humanTRB', '--human_T_beta', action='store_true', dest='humanTRB', default=False, help='use default human TRB model (T cell beta chain)')
     parser.add_option('--mouseTRB', '--mouse_T_beta', action='store_true', dest='mouseTRB', default=False, help='use default mouse TRB model (T cell beta chain)')
     parser.add_option('--humanIGH', '--human_B_heavy', action='store_true', dest='humanIGH', default=False, help='use default human IGH model (B cell heavy chain)')
+    parser.add_option('--humanIGK', action='store_true', dest='humanIGK', default=False, help='use default human IGK model')
+
     parser.add_option('--VDJ_model_folder', dest='vdj_model_folder', metavar='PATH/TO/FOLDER/', help='specify PATH/TO/FOLDER/ for a custom VDJ generative model')
     parser.add_option('--VJ_model_folder', dest='vj_model_folder', metavar='PATH/TO/FOLDER/', help='specify PATH/TO/FOLDER/ for a custom VJ generative model')
     parser.add_option('-o', '--outfile', dest = 'outfile_name', metavar='PATH/TO/FILE', help='write CDR3 sequences to PATH/TO/FILE')
@@ -180,6 +189,8 @@ def main():
     default_models['humanTRB'] = [os.path.join(main_folder, 'default_models', 'human_T_beta'), 'VDJ']
     default_models['mouseTRB'] = [os.path.join(main_folder, 'default_models', 'mouse_T_beta'), 'VDJ']
     default_models['humanIGH'] = [os.path.join(main_folder, 'default_models', 'human_B_heavy'), 'VDJ']
+    default_models['humanIGK'] = [os.path.join(main_folder, 'default_models', 'human_IGK'), 'VJ']
+
 
     num_models_specified = sum([1 for x in list(default_models.keys()) + ['vj_model_folder', 'vdj_model_folder'] if getattr(options, x)])
 

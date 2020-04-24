@@ -13,7 +13,7 @@ As adaptive repertoire researchers span the full gamut of technical coding skill
 Documentation and examples provided below. Ideally, even the interested party who is uncomfortable with coding should be able to manage from the examples.
 
 ## Version
-Latest released version: 1.1.3
+Latest released version: 1.2.0
 
 ## Installation
 OLGA is a python 2.7 software which only uses standard python libraries and requires no additional dependencies. It is available on PyPI and can be downloaded and installed through pip: ```pip install olga```.
