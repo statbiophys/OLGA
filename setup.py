@@ -7,7 +7,7 @@ from setuptools import setup, find_packages
 data_files_to_include = [('', ['README.md', 'LICENSE', 'example_expanded_amino_acid_alphabet.txt'])]
 
 setup(name='olga',
-      version='1.2.0',
+      version='1.2.1',
       description='Compute generation probability of CDR3 sequences',
       long_description='text/markdown',
       url='https://github.com/zsethna/OLGA',
