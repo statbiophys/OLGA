@@ -382,8 +382,7 @@ def gene_to_num_str(gene_name, gene_type):
     num_str = gene_type.lower().join([g.lstrip('0') for g in gene_name.lower().split(gene_type.lower())[1:]])
     num_str = '-'.join([g.lstrip('0') for g in num_str.split('-')])
     num_str = '*'.join([g.lstrip('0') for g in num_str.split('*')])
-    
-    return gene_type.lower() + num_str
+    return gene_type.lower() + num_str.replace('/', '') # get rid of '/' too
 
 #%% Entropy Functions
 def calc_S(P, base):

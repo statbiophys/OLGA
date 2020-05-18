@@ -173,16 +173,8 @@ class PreprocessedParameters(object):
             V_mask_mapping[v] = []
             if '-' not in v:
                 V_mask_mapping[v+'-1'] = []
-                if 'd' in v and (not '/' in v):
-                    V_mask_mapping['/d'.join(v.split('d'))+'-1'] = []
-                elif 'd' in v and '/' in v:
-                    V_mask_mapping['d'.join(v.split('/d'))+'-1'] = []
             else:
                 V_mask_mapping[v.split('-')[0]] = []
-                if 'd' in v and (not '/' in v):
-                    V_mask_mapping['/d'.join(v.split('d')).split('-')[0]] = []
-                elif 'd' in v and '/' in v:
-                    V_mask_mapping['d'.join(v.split('/d')).split('-')[0]] = []
 
         for i, v in enumerate(V_reduced_allele_names):
             V_mask_mapping[v] = [i]
@@ -190,19 +182,8 @@ class PreprocessedParameters(object):
             if '-' not in v:
                 V_mask_mapping[v.replace('*', '-1*')] = [i]
                 V_mask_mapping[v.split('*')[0] + '-1'].append(i)
-                if 'd' in v and (not '/' in v):
-                    V_mask_mapping['/d'.join(v.split('*')[0].split('d')).replace('*', '-1*')]=[i]
-                    V_mask_mapping['/d'.join(v.split('*')[0].split('d')).split('*')[0] + '-1'].append(i)
-                elif 'd' in v and '/' in v:
-                    V_mask_mapping['d'.join(v.split('*')[0].split('/d')).replace('*', '-1*')]=[i]
-                    V_mask_mapping['d'.join(v.split('*')[0].split('/d')).split('*')[0] + '-1'].append(i)
-
             else:
                 V_mask_mapping[v.split('*')[0].split('-')[0]].append(i)
-                if 'd' in v and (not '/' in v):
-                    V_mask_mapping['/d'.join(v.split('*')[0].split('d')).split('-')[0]].append(i)
-                elif 'd' in v and '/' in v:
-                    V_mask_mapping['d'.join(v.split('*')[0].split('/d')).split('-')[0]].append(i)
 
         #construct mapping between allele/gene names and index for custom J_usage_masks
         J_allele_names = [J[0] for J in genJ]
