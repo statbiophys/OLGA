@@ -34,8 +34,8 @@ in a micromamba environment using python3.6 and numba 0.53.1.
 
 The new `numba` implementation produces Pgen values that are functionally equivalent to the original,
 but since the number of float operations has changed, it is not possible to achieve an exact bit match. 
-However, during testing, 100% of all sequences were <= 9 [ULPs]https://en.wikipedia.org/wiki/Unit_in_the_last_place)
-of the old value, with 99.9% <= 4. Here's what that looks like in practice.
+However, during testing, 100% of all sequences were <= 9 [ULPs](https://en.wikipedia.org/wiki/Unit_in_the_last_place)
+of the old value, with 99.9% <= 4 ULPs. Here's what that looks like in practice.
 
 ```bash
 # 1 ULP off
@@ -72,7 +72,7 @@ The installation process is the same, just using this fork. You can directly `pi
 
 ```bash
 # pip uninstall olga (if already installed)
-pip install git+https://github.com/dweb0/olga
+pip install git+https://github.com/dweb0/OLGA
 ```
 
 You will also need `numba` installed in your environment
@@ -127,7 +127,7 @@ that only happens once.
 
 ## Limitations
 
-- This submodule is only for computing Pgen, not generating sequences. It seems
+This submodule is only for computing Pgen, not generating sequences. It seems
 there is already a tool for that though called [OLHA](https://github.com/statbiophys/olha).
 
 ## Tips
