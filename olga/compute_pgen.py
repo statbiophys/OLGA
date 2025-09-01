@@ -245,6 +245,8 @@ Options:
   --comment_delimiter=COMMENT_DELIMITER
                         character or string to indicate comment or header
                         lines to skip.
+  --fast_pgen           Use the numba implementation to calculate Pgen,
+                        which is much faster.
 --------------------------------------------------------------------------------
 
 
@@ -264,6 +266,7 @@ if 'olga' not in installed_packages: sys.path.insert(0, os.path.split(os.path.di
 import olga.load_model as load_model
 import olga.generation_probability as generation_probability
 from olga.utils import nt2aa, determine_seq_type, gene_to_num_str
+from olga.performance.fast_pgen import FastPgen
 #
 #import load_model
 #import generation_probability
@@ -327,7 +330,7 @@ def main():
     parser.add_option('--gene_mask_delimiter', type='choice', dest='gene_mask_delimiter',  choices=['tab', 'space', ',', ';', ':'], help="declare gene mask delimiter. Default comma unless infile delimiter is comma, then default is a semicolon. Choices: 'tab', 'space', ',', ';', ':'")
     parser.add_option('--raw_gene_mask_delimiter', type='str', dest='gene_mask_delimiter', help="declare delimiter of gene masks as a raw string.")
     parser.add_option('--comment_delimiter', type='str', dest='comment_delimiter', help="character or string to indicate comment or header lines to skip.")
-
+    parser.add_option('--fast_pgen', action='store_true', dest='fast_pgen', default=False, help='Use the numba implementation to calculate Pgen, which is much faster.')
 
     (options, args) = parser.parse_args()
 
@@ -407,6 +410,9 @@ def main():
         generative_model = load_model.GenerativeModelVJ()
         generative_model.load_and_process_igor_model(marginals_file_name)
         pgen_model = generation_probability.GenerationProbabilityVJ(generative_model, genomic_data, alphabet_filename)
+    
+    if options.fast_pgen:
+        pgen_model = FastPgen(pgen_model)
 
     aa_alphabet = ''.join(pgen_model.codons_dict.keys())
 
