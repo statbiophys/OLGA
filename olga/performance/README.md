@@ -16,16 +16,13 @@ It is highly recommended you conduct your own tests before using in production.
 The new method was tested on human AIRR-seq datasets for all available models, each with 500,000 sequences, 
 providing the `junction_aa`, `v_call`, and `j_call` as input, with and without the new `--fast_pgen` flag.
 
-| Model (# of seqs) | OLGA | OLGA `--fast_pgen`  | Speedup |
+| Model | OLGA | OLGA `--fast_pgen`  | Speedup |
 | ----- | ---- | ------------------- | ------- | 
-| humanTRA (500k)  | 15m26s | 1m00s | 15x |
-| humanTRB (500k)  | 163m43s | 2m06s | **78x** |
-| humanIGK (500k)  | 29m45s | 1m25s | 21x |
-| humanIGL (500k)  | 24m47s | 1m04s | 23x |
-| humanIGH (500k)* |  | 22m31s |  |
-| humanIGH (10k)   | 50m34s | 27s | **112x** |
-
-* For IGH, the original method was taking forever, so I had to switch to 10k sequences.
+| humanTRA | 15m26s | 1m00s | 15x |
+| humanTRB | 163m43s | 2m06s | **78x** |
+| humanIGH | 2868m53s | 22m31s | **127x** |
+| humanIGK | 29m45s | 1m25s | 21x |
+| humanIGL | 24m47s | 1m04s | 23x |
 
 > Timings were recorded on a linux server with an Intel Xeon Gold 5220 CPU @ 2.20GHz
 in a micromamba environment using python3.6 and numba 0.53.1.
