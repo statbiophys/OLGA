@@ -144,6 +144,131 @@ class FastPgen:
     def __getattr__(self, name):
         return getattr(self._impl, name)
 
+    def _warmup_numba(self):
+        """Pre-compile numba functions to avoid JIT overhead in parallel workers.
+        
+        This method should be called after unpickling to ensure all numba functions
+        are compiled before the first real computation in a worker process.
+        The most effective warmup is to actually call compute_CDR3_pgen with a real
+        sequence, which exercises all code paths.
+        """
+        try:
+            # Best warmup: call the actual compute method with a simple sequence
+            # This ensures all numba functions are compiled with the correct signatures
+            # Use a simple sequence that's likely to work
+            dummy_seq = "CA"  # Minimal valid sequence
+            # Get valid V and J indices (use first available)
+            if hasattr(self._impl, 'V_mask_mapping'):
+                V_indices = list(self._impl.V_mask_mapping.values()) if hasattr(self._impl.V_mask_mapping, 'values') else [0]
+                J_indices = list(self._impl.J_mask_mapping.values()) if hasattr(self._impl.J_mask_mapping, 'values') else [0]
+            else:
+                # Fallback: try to get V/J usage masks
+                try:
+                    # Try to compute with minimal masks
+                    V_usage_mask = [1] * (len(self._impl.V_allele_names) if hasattr(self._impl, 'V_allele_names') else 1)
+                    J_usage_mask = [1] * (len(self._impl.J_allele_names) if hasattr(self._impl, 'J_allele_names') else 1)
+                    # Actually call compute_CDR3_pgen - this will compile everything
+                    _ = self.compute_CDR3_pgen(dummy_seq, V_usage_mask, J_usage_mask)
+                    return  # Success - all functions compiled
+                except Exception:
+                    pass
+            
+            # Fallback: manual warmup if the above fails
+            dummy_aa_seq = self._aa_lut[np.frombuffer(dummy_seq.encode('ascii'), np.uint8)]
+            dummy_aa_seq = dummy_aa_seq[dummy_aa_seq >= 0]
+            if len(dummy_aa_seq) == 0:
+                return  # Can't warmup without valid sequence
+            
+            L3 = len(dummy_aa_seq) * 3
+            
+            if isinstance(self._impl, GenerationProbabilityVDJ):
+                # Warm up VDJ functions
+                dummy_Pi_V = np.ones((4, L3), dtype=np.float64) * 0.25
+                dummy_out_L = np.zeros((4, L3))
+                max_align = min(L3, 15)
+                compute_Pi_L_numba(
+                    dummy_out_L, dummy_aa_seq, dummy_Pi_V,
+                    self.PinsVD,
+                    self.first_nt_bias_insVD,
+                    self.zero_nt_bias_insVD,
+                    self.Svd_stack, self.Dvd_stack, self.Tvd_stack,
+                    self.lDvd_stack, self.lTvd_stack,
+                    max_align
+                )
+                
+                dummy_Pi_J_given_D = [np.ones((4, L3), dtype=np.float64) * 0.25]
+                dummy_out_J = np.zeros((1, 4, L3))
+                compute_Pi_JinsDJ_given_D_numba(
+                    dummy_out_J,
+                    dummy_aa_seq,
+                    np.stack(dummy_Pi_J_given_D, axis=0),
+                    self.PinsDJ,
+                    self.first_nt_bias_insDJ,
+                    self.zero_nt_bias_insDJ,
+                    self.Sdj_stack, self.Ddj_stack, self.Tdj_stack,
+                    self.rDdj_stack, self.rTdj_stack,
+                    max_align
+                )
+                
+                dummy_Pi_R = np.zeros((4, L3))
+                dummy_Pi_JinsDJ = np.ones((4, L3), dtype=np.float64) * 0.25
+                for pre in self.D_pre[:1]:  # Just warm up first D segment
+                    compute_Pi_R_one_numba(
+                        dummy_Pi_R, L3, -L3,
+                        pre['dseq'],
+                        dummy_Pi_JinsDJ,
+                        pre['Pdel_D'],
+                        pre['max_del_D'],
+                        pre['min_del_D'],
+                        pre['PD_nt'], pre['PD_2nd_stack'], pre['zeroD'],
+                        dummy_aa_seq, self.allow_lsf_stack, self.allow1, self.allow2, self.allow3
+                    )
+            else:
+                # Warm up VJ functions
+                dummy_Pi_V_given_J = [np.ones((4, L3), dtype=np.float64) * 0.25]
+                dummy_out_V = np.zeros((1, 4, L3))
+                max_V_align = min(L3, 15)
+                compute_Pi_V_insVJ_given_J_numba(
+                    dummy_out_V,
+                    dummy_aa_seq,
+                    np.stack(dummy_Pi_V_given_J, axis=0),
+                    self.PinsVJ,
+                    self.first_nt_bias_insVJ,
+                    self.zero_nt_bias_insVJ,
+                    self.Svj_stack, self.Dvj_stack, self.Tvj_stack,
+                    self.lDvj_stack, self.lTvj_stack,
+                    max_V_align
+                )
+        except Exception:
+            # Silently ignore warmup errors - functions will compile on first use
+            pass
+
+    def __getstate__(self):
+        """Custom pickling: store all instance attributes and remove monkey patch."""
+        state = self.__dict__.copy()
+        # Remove the monkey-patched method from _impl to avoid pickling closure issues
+        # The closure in the monkey-patched method references self, which causes circular references
+        # Check if it's an instance attribute (our monkey patch) vs class method
+        if hasattr(self._impl, 'compute_CDR3_pgen'):
+            # Check if it's stored as an instance attribute (our monkey patch)
+            if 'compute_CDR3_pgen' in self._impl.__dict__:
+                # Temporarily remove it - we'll restore it in __setstate__
+                del self._impl.__dict__['compute_CDR3_pgen']
+        return state
+
+    def __setstate__(self, state):
+        """Custom unpickling: restore all attributes and re-apply monkey patch."""
+        # Restore all attributes
+        self.__dict__.update(state)
+        
+        # Always restore the monkey patch (it's always applied in __init__)
+        def _proxy(impl_self, *args, **kwargs):
+            return self.compute_CDR3_pgen(*args, **kwargs)
+        self._impl.compute_CDR3_pgen = MethodType(_proxy, self._impl)
+        
+        # Warm up numba functions to avoid JIT compilation overhead in parallel workers
+        self._warmup_numba()
+
 
     def compute_CDR3_pgen(
         self,
