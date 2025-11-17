@@ -174,7 +174,7 @@ class FastPgen:
                     pass
             
             # Fallback: manual warmup if the above fails
-            dummy_aa_seq = self._aa_lut[np.frombuffer(dummy_seq.encode('ascii'), np.uint8)]
+            dummy_aa_seq = self._aa_lut[np.frombuffer(dummy_seq.encode('latin-1'), np.uint8)]
             dummy_aa_seq = dummy_aa_seq[dummy_aa_seq >= 0]
             if len(dummy_aa_seq) == 0:
                 return  # Can't warmup without valid sequence
@@ -313,7 +313,7 @@ class FastPgen:
 
         out = np.zeros((numD, 4, L3))
         Pi_V_given_J = np.stack(Pi_V_given_J, axis=0)
-        aa_idx_seq = self._aa_lut[np.frombuffer(CDR3_seq.encode('ascii'), np.uint8)]
+        aa_idx_seq = self._aa_lut[np.frombuffer(CDR3_seq.encode('latin-1'), np.uint8)]
         
         compute_Pi_V_insVJ_given_J_numba(
             out,
@@ -340,7 +340,7 @@ class FastPgen:
 
         out = np.zeros((numD, 4, L3))
         Pi_J_given_D = np.stack(Pi_J_given_D, axis=0)
-        aa_idx_seq = self._aa_lut[np.frombuffer(CDR3_seq.encode('ascii'), np.uint8)]
+        aa_idx_seq = self._aa_lut[np.frombuffer(CDR3_seq.encode('latin-1'), np.uint8)]
 
         compute_Pi_JinsDJ_given_D_numba(
             out,
@@ -359,7 +359,7 @@ class FastPgen:
     def compute_Pi_R(self, CDR3_seq: str, Pi_JinsDJ_given_D: np.ndarray) -> np.ndarray:
         L3 = len(CDR3_seq) * 3
         Pi_R = np.zeros((4, L3))
-        aa_idx_seq = self._aa_lut[np.frombuffer(CDR3_seq.encode('ascii'), np.uint8)]
+        aa_idx_seq = self._aa_lut[np.frombuffer(CDR3_seq.encode('latin-1'), np.uint8)]
 
         allow_lsf_stack = self.allow_lsf_stack
         allow1 = self.allow1
@@ -384,7 +384,7 @@ class FastPgen:
     def compute_Pi_L(self, CDR3_seq: str, Pi_V: np.ndarray, max_V_align: int) -> np.ndarray:
         L3 = len(CDR3_seq) * 3
         Pi_L = np.zeros((4, L3))
-        aa_idx_seq = self._aa_lut[np.frombuffer(CDR3_seq.encode('ascii'), np.uint8)]
+        aa_idx_seq = self._aa_lut[np.frombuffer(CDR3_seq.encode('latin-1'), np.uint8)]
 
         compute_Pi_L_numba(
             Pi_L, aa_idx_seq, Pi_V,

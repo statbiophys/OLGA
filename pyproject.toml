@@ -31,6 +31,12 @@ classifiers = [
 urls = {Homepage = "https://github.com/statbiophys/OLGA"}
 dependencies = [ "numpy", "numba" ]
 
+[project.optional-dependencies]
+test = [
+    "pytest>=6.0",
+    "pytest-cov>=3.0",
+]
+
 [project.scripts]
 olga-compute_pgen = "olga.compute_pgen:main"
 olga-generate_sequences = "olga.generate_sequences:main"
@@ -53,4 +59,18 @@ zip-safe = false
 
 [tool.setuptools.data-files]
 "" = ["README.md", "LICENSE", "example_expanded_amino_acid_alphabet.txt"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "-v",
+    "--strict-markers",
+    "--tb=short",
+]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+]
 
