@@ -28,58 +28,6 @@ conda install -c conda-forge numba
 ```
 The fast implementation is enabled by default in `olga-compute_pgen` (use `--skip_fast_pgen` to disable). See the [Performance Module](#performance-module-fastpgen) section for more details.
 
-
-
-Directory architecture:
-```
-olga/
-│   README.md
-│   LICENSE
-│   setup.py
-│   example_expanded_amino_acid_alphabet.txt  
-│
-└───olga/
-    │   __init__.py
-    │   compute_pgen.py
-    │   generate_sequences.py
-    │   generation_probability.py
-    │   preprocess_generative_model_and_data.py
-    │   load_model.py
-    │   sequence_generation.py
-    │   utils.py
-    │
-    └───performance/
-    │       __init__.py
-    │       fast_pgen.py
-    │       kernels.py
-    │       README.md
-    │
-    └───default_models/
-        └───human_T_alpha/
-        │       model_marginals.txt
-        │       model_params.txt
-        │       J_gene_CDR3_anchors.txt
-        │       V_gene_CDR3_anchors.txt
-        │
-        └───human_T_beta/
-        │       model_marginals.txt
-        │       model_params.txt
-        │       J_gene_CDR3_anchors.txt
-        │       V_gene_CDR3_anchors.txt
-        │
-        └───human_B_heavy/
-        │       model_marginals.txt
-        │       model_params.txt
-        │       J_gene_CDR3_anchors.txt
-        │       V_gene_CDR3_anchors.txt
-        │
-        └───mouse_T_beta/
-                model_marginals.txt
-                model_params.txt
-                J_gene_CDR3_anchors.txt
-                V_gene_CDR3_anchors.txt
-```
-
 ## Command line console scripts and Examples
 
 There are two command line console scripts (the scripts can still be called as executables if OLGA is not installed):
