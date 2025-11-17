@@ -68,6 +68,9 @@ All of the console scripts require specifying a V(D)J generative model and genom
 | **--humanIGH**                                 | Default human B cell heavy chain model (VDJ)     |
 | **--humanIGK**                                 | Default human B cell kappa light chain model (VJ) |
 | **--humanIGL**                                 | Default human B cell lambda light chain model (VJ) |
+| **--mouseIGH**                                 | Default mouse B cell heavy chain model (VDJ)     |
+| **--mouseIGK**                                 | Default mouse B cell kappa light chain model (VJ) |
+| **--mouseIGL**                                 | Default mouse B cell lambda light chain model (VJ) |
 | **--set_custom_model_VJ** PATH/TO/MODEL_FOLDER/ | Specifies the directory PATH/TO/MODEL_FOLDER/ of a custom VJ generative model      |
 | **--set_custom_model_VDJ** PATH/TO/MODEL_FOLDER/| Specifies the directory PATH/TO/MODEL_FOLDER/ of a custom VDJ generative model     |
 
