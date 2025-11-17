@@ -28,12 +28,17 @@ Options for alphabet_file to specify custom symbols)
 2) Nucleotide sequence (in-frame)
 3) Regular expression template for 'amino acid sequences'
 
-There are four default generative models that ship with OLGA and can be
+There are multiple default generative models that ship with OLGA and can be
 specified with a flag:
 --humanTRA (Human T cell alpha chain VJ model)
 --humanTRB (Human T cell beta chain VDJ model)
 --mouseTRB (Mouse T cell beta chain VDJ model)
 --humanIGH (Human B cell heavy chain VDJ model)
+--humanIGK (Human B cell light kappa chain VJ model)
+--humanIGL (Human B cell light lambda chain VJ model)
+--mouseIGH (Mouse B cell heavy chain VDJ model)
+--mouseIGK (Mouse B cell light kappa chain VJ model)
+--mouseIGL (Mouse B cell light lambda chain VJ model)
 
 A custom model can also be specified (see below for details).
 
@@ -169,10 +174,20 @@ Options:
                         use default human TRB model (T cell beta chain)
   --mouseTRB, --mouse_T_beta
                         use default mouse TRB model (T cell beta chain)
+  --mouseTRA, --mouse_T_alpha
+                        use default mouse TRA model (T cell alpha chain)
   --humanIGH, --human_B_heavy
                         use default human IGH model (B cell heavy chain)
   --humanIGK
-                        use default human IGK model
+                        use default human IGK model (B cell light kappa chain)
+  --humanIGL, --human_B_lambda
+                        use default human IGL model (B cell light lambda chain)
+  --mouseIGH, --mouse_B_heavy
+                        use default mouse IGH model (B cell heavy chain)
+  --mouseIGK, --mouse_B_kappa
+                        use default mouse IGK model (B cell light kappa chain)
+  --mouseIGL, --mouse_B_lambda
+                        use default mouse IGL model (B cell light lambda chain)
   --set_custom_model_VDJ=PATH/TO/FOLDER/
                         specify PATH/TO/FOLDER/ for a custom VDJ generative
                         model
@@ -295,10 +310,13 @@ def main():
     parser.add_option('--humanTRA', '--human_T_alpha', action='store_true', dest='humanTRA', default=False, help='use default human TRA model (T cell alpha chain)')
     parser.add_option('--humanTRB', '--human_T_beta', action='store_true', dest='humanTRB', default=False, help='use default human TRB model (T cell beta chain)')
     parser.add_option('--mouseTRB', '--mouse_T_beta', action='store_true', dest='mouseTRB', default=False, help='use default mouse TRB model (T cell beta chain)')
+    parser.add_option("--mouseTRA", '--mouse_T_alpha', action='store_true', dest='mouseTRA', default=False, help='use default mouse TRA model (T cell alpha chain)')
     parser.add_option('--humanIGH', '--human_B_heavy', action='store_true', dest='humanIGH', default=False, help='use default human IGH model (B cell heavy chain)')
-    parser.add_option('--mouseTRA', '--mouse_T_alpha', action='store_true', dest='mouseTRA', default=False, help='use default mouse TRA model (T cell alpha chain)')
     parser.add_option('--humanIGL', '--human_B_lambda', action='store_true', dest='humanIGL', default=False, help='use default human IGL model (B cell light lambda chain)')
     parser.add_option('--humanIGK', '--human_B_kappa', action='store_true', dest='humanIGK', default=False, help='use default human IGK model (B cell light kappa chain)')
+    parser.add_option('--mouseIGH', '--mouse_B_heavy', action='store_true', dest='mouseIGH', default=False, help='use default mouse IGH model (B cell heavy chain)')
+    parser.add_option('--mouseIGK', '--mouse_B_kappa', action='store_true', dest='mouseIGK', default=False, help='use default mouse IGK model (B cell light kappa chain)')
+    parser.add_option('--mouseIGL', '--mouse_B_lambda', action='store_true', dest='mouseIGL', default=False, help='use default mouse IGL model (B cell light lambda chain)')
     parser.add_option('--set_custom_model_VDJ', dest='vdj_model_folder', metavar='PATH/TO/FOLDER/', help='specify PATH/TO/FOLDER/ for a custom VDJ generative model')
     parser.add_option('--set_custom_model_VJ', dest='vj_model_folder', metavar='PATH/TO/FOLDER/', help='specify PATH/TO/FOLDER/ for a custom VJ generative model')
 
@@ -341,11 +359,13 @@ def main():
     default_models['humanTRA'] = [os.path.join(main_folder, 'default_models', 'human_T_alpha'),  'VJ']
     default_models['humanTRB'] = [os.path.join(main_folder, 'default_models', 'human_T_beta'), 'VDJ']
     default_models['mouseTRB'] = [os.path.join(main_folder, 'default_models', 'mouse_T_beta'), 'VDJ']
+    default_models['mouseTRA'] = [os.path.join(main_folder, 'default_models', 'mouse_T_alpha'), 'VJ']
     default_models['humanIGH'] = [os.path.join(main_folder, 'default_models', 'human_B_heavy'), 'VDJ']
     default_models['humanIGK'] = [os.path.join(main_folder, 'default_models', 'human_B_kappa'), 'VJ']
     default_models['humanIGL'] = [os.path.join(main_folder, 'default_models', 'human_B_lambda'),  'VJ']
-    default_models['mouseTRA'] = [os.path.join(main_folder, 'default_models', 'mouse_T_alpha'), 'VJ']
-
+    default_models['mouseIGH'] = [os.path.join(main_folder, 'default_models', 'mouse_B_heavy'), 'VDJ']
+    default_models['mouseIGK'] = [os.path.join(main_folder, 'default_models', 'mouse_B_kappa'), 'VJ']
+    default_models['mouseIGL'] = [os.path.join(main_folder, 'default_models', 'mouse_B_lambda'), 'VJ']
 
     num_models_specified = sum([1 for x in list(default_models.keys()) + ['vj_model_folder', 'vdj_model_folder'] if getattr(options, x)])
 

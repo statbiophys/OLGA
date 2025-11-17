@@ -16,9 +16,17 @@ Documentation and examples provided below. Ideally, even the interested party wh
 Latest released version: 1.2.4
 
 ## Installation
-OLGA is a python 2.7 software which only uses standard python libraries and requires no additional dependencies. It is available on PyPI and can be downloaded and installed through pip: ```pip install olga```.
+OLGA is a python 2.7/3.6+ software which uses standard python libraries. It is available on PyPI and can be downloaded and installed through pip: ```pip install olga```.
 
-OLGA is also available on [GitHub](https://github.com/zsethna/OLGA). The command line entry points can be installed by using the setup.py script: ```$ python setup.py install```. If the command line console scripts are not wanted, no installation is necessary and the scripts ```compute_pgen.py``` and ```generate_sequences.py``` can be run as executables.
+OLGA is also available on [GitHub](https://github.com/statbiophys/OLGA). The command line entry points can be installed by using the setup.py script: ```$ python setup.py install```. If the command line console scripts are not wanted, no installation is necessary and the scripts ```compute_pgen.py``` and ```generate_sequences.py``` can be run as executables.
+
+**Note on Performance Module:** For significantly faster Pgen computation (up to 127x speedup), the `olga.performance` module uses [numba](https://numba.pydata.org/) for JIT compilation. To use this feature, install numba:
+```bash
+pip install numba
+# or with conda/mamba
+conda install -c conda-forge numba
+```
+The fast implementation is enabled by default in `olga-compute_pgen` (use `--skip_fast_pgen` to disable). See the [Performance Module](#performance-module-fastpgen) section for more details.
 
 
 
@@ -38,6 +46,13 @@ olga/
     │   preprocess_generative_model_and_data.py
     │   load_model.py
     │   sequence_generation.py
+    │   utils.py
+    │
+    └───performance/
+    │   │   __init__.py
+    │   │   fast_pgen.py
+    │   │   kernels.py
+    │   │   README.md
     │
     └───default_models/
         └───human_T_alpha/
@@ -94,14 +109,17 @@ After installing OLGA, we offer a quick demonstration of the console scripts. Th
   * This reads in the full file example_seqs.tsv, and computes both the nucleotide sequence and the amino acid sequence pgen for each of the 100 sequences and writes them to the file example_pgens.tsv. A running display will be printed to stdout with the last few lines computed along with time/rate updates.
 
 ### Specifying a default V(D)J model (or a custom model folder)
-All of the console scripts require specifying a V(D)J generative model and genomic data. OLGA ships with 4 default models that can be indicated by flags, or a custom model folder can be indicated.
+All of the console scripts require specifying a V(D)J generative model and genomic data. OLGA ships with multiple default models that can be indicated by flags, or a custom model folder can be indicated.
 
 | Options                                        | Description                                      |
 |------------------------------------------------|--------------------------------------------------|
 | **--humanTRA**                                 | Default human T cell alpha chain model (VJ)      |
 | **--humanTRB**                                 | Default human T cell beta chain model (VDJ)      |
+| **--mouseTRA**                                 | Default mouse T cell alpha chain model (VJ)      |
 | **--mouseTRB**                                 | Default mouse T cell beta chain model (VDJ)      |
 | **--humanIGH**                                 | Default human B cell heavy chain model (VDJ)     |
+| **--humanIGK**                                 | Default human B cell kappa light chain model (VJ) |
+| **--humanIGL**                                 | Default human B cell lambda light chain model (VJ) |
 | **--set_custom_model_VJ** PATH/TO/MODEL_FOLDER/ | Specifies the directory PATH/TO/MODEL_FOLDER/ of a custom VJ generative model      |
 | **--set_custom_model_VDJ** PATH/TO/MODEL_FOLDER/| Specifies the directory PATH/TO/MODEL_FOLDER/ of a custom VDJ generative model     |
 
@@ -134,6 +152,8 @@ This script can read in sequences and output pgens in one of three modes (determ
 3. Read in CDR3 sequences from a file, output to a file, dynamic display with time updates printed to stdout.
 
 Full options can be printed by: ```$ olga-compute_pgen -h```
+
+**Performance Note:** By default, `olga-compute_pgen` uses the fast numba-accelerated implementation (see [Performance Module](#performance-module-fastpgen) section). This provides significant speedups (up to 127x for large datasets). To disable and use the original implementation, use the `--skip_fast_pgen` flag.
 
 **Mode 1):**
 
@@ -240,6 +260,7 @@ $ olga-compute_pgen -i example_seqs.tsv --humanTRB -o example_pgens.tsv --seq_in
 |   **-a** PATH/TO/FILE                          |  specify PATH/TO/FILE defining a custom 'amino acid' alphabet. Default is no custom alphabet.     |
 |   **--seq_type_out** SEQ_TYPE                  |   if read in sequences are ntseqs, declare what type of sequence to compute pgen for. Default is all. Choices: 'all', 'ntseq', 'aaseq'    |
 |  **--display_off**                             |   turn the sequence display off (only applies in write-to-file mode). Default is on.    |
+|  **--skip_fast_pgen**                          |   disable the fast numba-accelerated Pgen computation (use original implementation). Default is to use fast implementation if numba is available.    |
 |  **-d** DELIMITER                              |   declare infile delimiter. Default is tab for .tsv input files, comma for .csv files, and any whitespace for all others. Choices: 'tab', 'space', ',', ';', ':'    |
 |  **--raw_delimiter** DELIMITER                 |   declare infile delimiter as a raw string.    |
 |  **--delimiter_out**,  **--raw_delimiter_out**,  **--gene_mask_delimiter**, **--raw_gene_mask_delimiter**      |   declare delimiters for the outfile and for gene masks (read in from the columns of v_mask_index and j_mask_index). Same syntax as the infile delimiter.  |
@@ -306,6 +327,7 @@ The modules are:
 | preprocess_generative_model_and_data.py        | PreprocessedParametersVDJ, PreProcessedParametersVJ|
 | generation_probability.py                      | GenerationProbabilityVDJ, GenerationProbabilityVJ|
 | sequence_generation.py                         | SequenceGenerationVDJ, SequenceGenerationVJ      |
+| performance/fast_pgen.py                       | FastPgen                                         |
 | utils.py                                       | N/A (contains util functions)                    |
 
 The classes with methods that are of interest will be GenerationProbabilityV(D)J (to compute Pgens) and SequenceGenerationV(D)J (to generate sequences).
@@ -360,6 +382,26 @@ Here is an example of loading the default human TRB model to compute some sequen
 ('TGTGCCAGCTGGACAGGGGGCAACTACGAGCAGTACTTC', 'CASWTGGNYEQYF', 55, 13)
 ```
 Additional documentation of the modules is found in their docstrings (accessible either through pydoc or using help() within the python interpreter).
+
+## Performance Module (FastPgen)
+
+OLGA includes a high-performance implementation of Pgen computation using [numba](https://numba.pydata.org/) for JIT compilation. This provides dramatic speedups (up to 127x for large datasets) while maintaining numerical accuracy (results are within 9 ULPs of the original implementation).
+
+### Benchmarks
+
+The fast implementation was tested on human AIRR-seq datasets with 500,000 sequences:
+
+| Model | Standard OLGA | OLGA with FastPgen | Speedup |
+| ----- | ------------- | ------------------ | ------- | 
+| humanTRA | 15m26s | 1m00s | 15x |
+| humanTRB | 163m43s | 2m06s | **78x** |
+| humanIGH | 2868m53s | 22m31s | **127x** |
+| humanIGK | 29m45s | 1m25s | 21x |
+| humanIGL | 24m47s | 1m04s | 23x |
+
+### Multiprocessing Support
+
+FastPgen is fully compatible with multiprocessing and is integrated into the parallel [soNNia](https://github.com/statbiophys/soNNia) implementation of Pgen and Ppost computation.
 
 ## Notes about CDR3 sequence definition
 
