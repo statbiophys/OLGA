@@ -49,10 +49,10 @@ olga/
     │   utils.py
     │
     └───performance/
-    │   │   __init__.py
-    │   │   fast_pgen.py
-    │   │   kernels.py
-    │   │   README.md
+    │       __init__.py
+    │       fast_pgen.py
+    │       kernels.py
+    │       README.md
     │
     └───default_models/
         └───human_T_alpha/
