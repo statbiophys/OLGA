@@ -12,3 +12,6 @@
 .DS_Store
 
 .gitattributes
+
+testdata
+__pycache__

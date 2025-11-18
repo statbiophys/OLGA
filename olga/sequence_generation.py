@@ -208,7 +208,7 @@ class SequenceGenerationVDJ(object):
         """
         coding_pass = False
 
-        while ~coding_pass:
+        while not coding_pass:
             recomb_events = self.choose_random_recomb_events()
             V_seq = self.cutV_genomic_CDR3_segs[recomb_events['V']]
 
@@ -390,7 +390,7 @@ class SequenceGenerationVJ(object):
 
         coding_pass = False
 
-        while ~coding_pass:
+        while not coding_pass:
             recomb_events = self.choose_random_recomb_events()
             V_seq = self.cutV_genomic_CDR3_segs[recomb_events['V']]
 
